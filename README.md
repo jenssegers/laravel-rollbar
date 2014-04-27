@@ -22,10 +22,6 @@ Add the service provider in `app/config/app.php`:
 
     'Jenssegers\Rollbar\RollbarServiceProvider',
 
-Add the Rollbar alias to `app/config/app.php`:
-
-    'Rollbar'            => 'Jenssegers\Rollbar\Facades\Rollbar',
-
 Configuration
 -------------
 

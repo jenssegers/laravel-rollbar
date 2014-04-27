@@ -3,7 +3,7 @@
 use App;
 use Config;
 use Exception;
-use RollbarNotifier;
+use Rollbar;
 use Illuminate\Support\ServiceProvider;
 
 class RollbarServiceProvider extends ServiceProvider {
@@ -71,7 +71,8 @@ class RollbarServiceProvider extends ServiceProvider {
                 'max_errno' => Config::get('rollbar::max_errno')
             );
 
-            return new RollbarNotifier($config);
+            Rollbar::init($config, false, false);
+            return Rollbar::$instance;
         });
     }
 

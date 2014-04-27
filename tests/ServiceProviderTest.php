@@ -1,7 +1,5 @@
 <?php
 
-use Jenssegers\Rollbar\Facades\Rollbar;
-
 class ServiceProviderTest extends Orchestra\Testbench\TestCase {
 
     public function tearDown()
@@ -14,22 +12,10 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         return array('Jenssegers\Rollbar\RollbarServiceProvider');
     }
 
-    protected function getPackageAliases()
-    {
-        return array(
-            'Rollbar' => 'Jenssegers\Rollbar\Facades\Rollbar'
-        );
-    }
-
     public function testBinding()
     {
         $rollbar = App::make('rollbar');
         $this->assertInstanceOf('RollbarNotifier', $rollbar);
-    }
-
-    public function testIsFacade()
-    {
-        $this->assertInstanceOf('RollbarNotifier', Rollbar::getFacadeRoot());
     }
 
     public function testPassConfiguration()
