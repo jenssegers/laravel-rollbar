@@ -4,7 +4,19 @@ return array(
 
     /*
     |--------------------------------------------------------------------------
-    | Rollbar access token
+    | Rollbar State
+    |--------------------------------------------------------------------------
+    |
+    | Enable or disable automatic error and log reporting.
+    |
+    */
+
+    'enabled' => true,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Access Token
     |--------------------------------------------------------------------------
     |
     | This is your 'post_server_item' access token for the Rollbar API. This
@@ -18,10 +30,10 @@ return array(
 
     /*
     |--------------------------------------------------------------------------
-    | Maximum error number to report
+    | Maximum Error Number
     |--------------------------------------------------------------------------
     |
-    | Default: ignore E_STRICT and above.
+    | The maximum error number to report. Default: ignore E_STRICT and above.
     |
     */
 

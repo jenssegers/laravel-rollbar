@@ -25,34 +25,8 @@ class RollbarServiceProvider extends ServiceProvider {
         // Fix for PSR-4
         $this->package('jenssegers/rollbar', 'rollbar', realpath(__DIR__));
 
-        // Register error listener
-        $this->app->error(function(Exception $exception)
-        {
-            $rollbar = App::make('rollbar');
-            $rollbar->report_exception($exception);
-        });
-
-        // Register log listener
-        $this->app->log->listen(function($level, $message, $context)
-        {
-            $rollbar = App::make('rollbar');
-
-            if ($message instanceof Exception)
-            {
-                $rollbar->report_exception($message);
-            }
-            else
-            {
-                $rollbar->report_message($message, $level, $context);
-            }
-        });
-
-        // Register after filter
-        $this->app->after(function()
-        {
-            $rollbar = App::make('rollbar');
-            $rollbar->flush();
-        });
+        // Register listeners
+        $this->registerListeners();
     }
 
     /**
@@ -73,6 +47,49 @@ class RollbarServiceProvider extends ServiceProvider {
 
             Rollbar::init($config, false, false);
             return Rollbar::$instance;
+        });
+    }
+
+    /**
+     * Register error and log listeners.
+     *
+     * @return void
+     */
+    protected function registerListeners()
+    {
+        // Register error listener
+        $this->app->error(function(Exception $exception)
+        {
+            if ( ! Config::get('rollbar::enabled')) return;
+
+            $rollbar = App::make('rollbar');
+            $rollbar->report_exception($exception);
+        });
+
+        // Register log listener
+        $this->app->log->listen(function($level, $message, $context)
+        {
+            if ( ! Config::get('rollbar::enabled')) return;
+
+            $rollbar = App::make('rollbar');
+
+            if ($message instanceof Exception)
+            {
+                $rollbar->report_exception($message);
+            }
+            else
+            {
+                $rollbar->report_message($message, $level, $context);
+            }
+        });
+
+        // Register after filter
+        $this->app->after(function()
+        {
+            if ( ! Config::get('rollbar::enabled')) return;
+
+            $rollbar = App::make('rollbar');
+            $rollbar->flush();
         });
     }
 
