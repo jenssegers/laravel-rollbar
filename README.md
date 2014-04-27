@@ -5,6 +5,8 @@ Laravel Rollbar
 
 Rollbar error monitoring integration for Laravel projects.
 
+![rollbar](https://d37gvrvc0wt4s1.cloudfront.net/static/img/features-dashboard1.png?ts=1361907905)
+
 Installation
 ------------
 
