@@ -1,0 +1,25 @@
+{
+    "name": "jenssegers/rollbar",
+    "description": "Rollbar error monitoring integration for Laravel projects",
+    "keywords": ["laravel", "rollbar", "monitoring", "error", "logging"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jens Segers",
+            "homepage": "http://jenssegers.be"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "rollbar/rollbar": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "2.1.*",
+        "mockery/mockery": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jenssegers\\Rollbar\\": "src/"
+        }
+    }
+}

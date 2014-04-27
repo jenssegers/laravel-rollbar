@@ -1,0 +1,100 @@
+<?php
+
+use Jenssegers\Rollbar\Facades\Rollbar;
+
+class ServiceProviderTest extends Orchestra\Testbench\TestCase {
+
+    public function tearDown()
+    {
+        Mockery::close();
+    }
+
+    protected function getPackageProviders()
+    {
+        return array('Jenssegers\Rollbar\RollbarServiceProvider');
+    }
+
+    protected function getPackageAliases()
+    {
+        return array(
+            'Rollbar' => 'Jenssegers\Rollbar\Facades\Rollbar'
+        );
+    }
+
+    public function testBinding()
+    {
+        $rollbar = App::make('rollbar');
+        $this->assertInstanceOf('RollbarNotifier', $rollbar);
+    }
+
+    public function testIsFacade()
+    {
+        $this->assertInstanceOf('RollbarNotifier', Rollbar::getFacadeRoot());
+    }
+
+    public function testPassConfiguration()
+    {
+        $person = array('id' => uniqid(), 'username' => 'johndoe');
+        $token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
+
+        Config::set('rollbar::token', $token);
+        Config::set('rollbar::person', $person);
+
+        $rollbar = App::make('rollbar');
+        $this->assertEquals($token, $rollbar->access_token);
+        $this->assertEquals($person, $rollbar->person);
+    }
+
+    public function testIsSingleton()
+    {
+        $rollbar1 = App::make('rollbar');
+        $rollbar2 = App::make('rollbar');
+        $this->assertEquals(spl_object_hash($rollbar1), spl_object_hash($rollbar2));
+    }
+
+    public function testEnvironment()
+    {
+        $rollbar = App::make('rollbar');
+        $this->assertEquals(App::environment(), $rollbar->environment);
+        $this->assertEquals(base_path(), $rollbar->root);
+        //$this->assertEquals(E_USER_NOTICE, $rollbar->max_errno);
+    }
+
+    public function testRegisterErrorListener()
+    {
+        $exception = new Exception('Testing error handler');
+
+        $mock = Mockery::mock('RollbarNotifier');
+        $mock->shouldReceive('report_exception')->once()->with($exception);
+        $this->app->instance('rollbar', $mock);
+
+        $handler = $this->app->exception;
+        $response = (string) $handler->handleException($exception);
+    }
+
+    public function testRegisterLogListener()
+    {
+        $exception = new Exception('Testing error handler');
+
+        $mock = Mockery::mock('RollbarNotifier');
+        $mock->shouldReceive('report_message')->once()->with('hello', 'info', array());
+        $mock->shouldReceive('report_message')->once()->with('oops', 'error', array('context'));
+        $mock->shouldReceive('report_exception')->once()->with($exception);
+        $this->app->instance('rollbar', $mock);
+
+        Log::info('hello');
+        Log::error('oops', array('context'));
+        Log::error($exception);
+    }
+
+    public function testFlush()
+    {
+        $mock = Mockery::mock('RollbarNotifier');
+        $mock->shouldReceive('flush')->once();
+        $this->app->instance('rollbar', $mock);
+
+        Route::enableFilters();
+        Event::fire('router.after');
+    }
+
+}
