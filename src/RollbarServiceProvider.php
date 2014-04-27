@@ -22,7 +22,8 @@ class RollbarServiceProvider extends ServiceProvider {
      */
     public function boot()
     {
-        $this->package('jenssegers/rollbar');
+        // Fix for PSR-4
+        $this->package('jenssegers/rollbar', 'rollbar', realpath(__DIR__));
 
         // Register error listener
         $this->app->error(function(Exception $exception)

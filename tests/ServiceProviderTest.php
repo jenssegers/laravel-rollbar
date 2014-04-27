@@ -53,7 +53,7 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $rollbar = App::make('rollbar');
         $this->assertEquals(App::environment(), $rollbar->environment);
         $this->assertEquals(base_path(), $rollbar->root);
-        //$this->assertEquals(E_USER_NOTICE, $rollbar->max_errno);
+        $this->assertEquals(E_USER_NOTICE, $rollbar->max_errno);
     }
 
     public function testRegisterErrorListener()
