@@ -67,8 +67,7 @@ class RollbarServiceProvider extends ServiceProvider {
                 'access_token' => Config::get('rollbar::token'),
                 'environment' => App::environment(),
                 'root' => base_path(),
-                'max_errno' => Config::get('rollbar::max_errno'),
-                'person' => Config::get('rollbar::person'),
+                'max_errno' => Config::get('rollbar::max_errno')
             );
 
             return new RollbarNotifier($config);

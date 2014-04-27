@@ -34,15 +34,11 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
 
     public function testPassConfiguration()
     {
-        $person = array('id' => uniqid(), 'username' => 'johndoe');
         $token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-
         Config::set('rollbar::token', $token);
-        Config::set('rollbar::person', $person);
 
         $rollbar = App::make('rollbar');
         $this->assertEquals($token, $rollbar->access_token);
-        $this->assertEquals($person, $rollbar->person);
     }
 
     public function testIsSingleton()

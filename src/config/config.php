@@ -18,21 +18,6 @@ return array(
 
     /*
     |--------------------------------------------------------------------------
-    | User identification
-    |--------------------------------------------------------------------------
-    |
-    | An associative array containing data about the currently-logged in user.
-    | Required: id, optional: username, email. All values are strings.
-    |
-    */
-
-    'person' => array(
-
-    ),
-
-
-    /*
-    |--------------------------------------------------------------------------
     | Maximum error number to report
     |--------------------------------------------------------------------------
     |
