@@ -4,14 +4,14 @@ return array(
 
     /*
     |--------------------------------------------------------------------------
-    | Rollbar State
+    | Rollbar Environments
     |--------------------------------------------------------------------------
     |
-    | Enable or disable automatic error and log reporting.
+    | Enable automatic error and log reporting for these environments.
     |
     */
 
-    'enabled' => true,
+    'environments' => array('production'),
 
 
     /*

@@ -60,7 +60,7 @@ class RollbarServiceProvider extends ServiceProvider {
         // Register error listener
         $this->app->error(function(Exception $exception)
         {
-            if ( ! Config::get('rollbar::enabled')) return;
+            if ( ! in_array(App::environment(), Config::get('rollbar::environments'))) return;
 
             $rollbar = App::make('rollbar');
             $rollbar->report_exception($exception);
@@ -69,7 +69,7 @@ class RollbarServiceProvider extends ServiceProvider {
         // Register log listener
         $this->app->log->listen(function($level, $message, $context)
         {
-            if ( ! Config::get('rollbar::enabled')) return;
+            if ( ! in_array(App::environment(), Config::get('rollbar::environments'))) return;
 
             $rollbar = App::make('rollbar');
 
@@ -86,7 +86,7 @@ class RollbarServiceProvider extends ServiceProvider {
         // Register after filter
         $this->app->after(function()
         {
-            if ( ! Config::get('rollbar::enabled')) return;
+            if ( ! in_array(App::environment(), Config::get('rollbar::environments'))) return;
 
             $rollbar = App::make('rollbar');
             $rollbar->flush();

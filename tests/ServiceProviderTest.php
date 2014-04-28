@@ -1,6 +1,14 @@
 <?php
 
+use Config;
+
 class ServiceProviderTest extends Orchestra\Testbench\TestCase {
+
+    public function setUp()
+    {
+        parent::setUp();
+        Config::set('rollbar::environments', array('testing'));
+    }
 
     public function tearDown()
     {
@@ -79,9 +87,38 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         Event::fire('router.after');
     }
 
-    public function testDisabled()
+    public function testEnvironments()
     {
-        Config::set('rollbar::enabled', false);
+        Config::set('rollbar::environments', array('production', 'local', 'staging'));
+        $this->app['env'] = 'local';
+
+        $mock = Mockery::mock('RollbarNotifier');
+        $mock->shouldReceive('report_message')->times(1);
+        $mock->shouldReceive('report_exception')->times(1);
+        $this->app->instance('rollbar', $mock);
+
+        $handler = $this->app->exception;
+        $handler->handleException(new Exception('Testing error handler'));
+        Log::info('hello');
+
+        // ------
+
+        Config::set('rollbar::environments', array('production', 'local', 'staging'));
+        $this->app['env'] = 'testing';
+
+        $mock = Mockery::mock('RollbarNotifier');
+        $mock->shouldReceive('report_message')->times(0);
+        $mock->shouldReceive('report_exception')->times(0);
+        $this->app->instance('rollbar', $mock);
+
+        $handler = $this->app->exception;
+        $handler->handleException(new Exception('Testing error handler'));
+        Log::info('hello');
+
+        // ------
+
+        Config::set('rollbar::environments', array());
+        $this->app['env'] = 'testing';
 
         $mock = Mockery::mock('RollbarNotifier');
         $mock->shouldReceive('report_message')->times(0);
