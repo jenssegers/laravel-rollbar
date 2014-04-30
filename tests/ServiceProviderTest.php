@@ -1,7 +1,5 @@
 <?php
 
-use Config;
-
 class ServiceProviderTest extends Orchestra\Testbench\TestCase {
 
     public function setUp()
@@ -29,10 +27,32 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     public function testPassConfiguration()
     {
         $token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-        Config::set('rollbar::token', $token);
+        Config::set('rollbar::access_token', $token);
 
         $rollbar = App::make('rollbar');
         $this->assertEquals($token, $rollbar->access_token);
+    }
+
+    public function testDefaultConfiguration()
+    {
+        $rollbar = App::make('rollbar');
+        $this->assertEquals(App::environment(), $rollbar->environment);
+        $this->assertEquals(base_path(), $rollbar->root);
+        $this->assertEquals(E_USER_NOTICE, $rollbar->max_errno);
+        $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
+    }
+
+    public function testCustomConfiguration()
+    {
+        Config::set('rollbar::environment', 'staging');
+        Config::set('rollbar::root', '/tmp');
+        Config::set('rollbar::max_errno', E_ERROR);
+
+        $rollbar = App::make('rollbar');
+        $this->assertEquals('staging', $rollbar->environment);
+        $this->assertEquals('/tmp', $rollbar->root);
+        $this->assertEquals(E_ERROR, $rollbar->max_errno);
+        $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
     }
 
     public function testIsSingleton()
@@ -40,14 +60,6 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $rollbar1 = App::make('rollbar');
         $rollbar2 = App::make('rollbar');
         $this->assertEquals(spl_object_hash($rollbar1), spl_object_hash($rollbar2));
-    }
-
-    public function testEnvironment()
-    {
-        $rollbar = App::make('rollbar');
-        $this->assertEquals(App::environment(), $rollbar->environment);
-        $this->assertEquals(base_path(), $rollbar->root);
-        $this->assertEquals(E_USER_NOTICE, $rollbar->max_errno);
     }
 
     public function testRegisterErrorListener()

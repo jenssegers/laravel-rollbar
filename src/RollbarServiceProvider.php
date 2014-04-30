@@ -38,12 +38,13 @@ class RollbarServiceProvider extends ServiceProvider {
     {
         $this->app->bindShared('rollbar', function($app)
         {
-            $config = array(
-                'access_token' => Config::get('rollbar::token'),
+            // Automatic values
+            $automatic = array(
                 'environment' => App::environment(),
-                'root' => base_path(),
-                'max_errno' => Config::get('rollbar::max_errno')
+                'root' => base_path()
             );
+
+            $config = array_merge($automatic, Config::get('rollbar::config'));
 
             Rollbar::init($config, false, false);
             return Rollbar::$instance;
