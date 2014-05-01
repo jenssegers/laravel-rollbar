@@ -36,14 +36,13 @@ And change your rollbar access token:
 Usage
 -----
 
-The service provider will make sure all your exceptions and log messages are passed to Rollbar automatically.
+This library adds a listener to Laravel's logging system. To monitor exceptions, simply use the `Log` facade:
 
-    throw new Exception('Something went wrong');
+    App::error(function(Exception $exception, $code)
+    {
+        Log::error($exception);
+    });
 
-Or if you want to directly send the exception object:
+Your other log messages will also be sent to Sentry:
 
-    Log::error(new Exception('Something went wrong'));
-
-Your log messages will also be sent to Rollbar:
-
-    Log::info('Hello Rollbar', array('context'));
+    Log::info('Here is some debug information', array('context'));
