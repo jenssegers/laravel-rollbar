@@ -52,7 +52,10 @@ class RollbarServiceProvider extends ServiceProvider {
             \Rollbar::$instance = $instance;
 
             // Flush Rollbar on shutdown
-            register_shutdown_function(array($instance, 'flush'));
+            if ($instance->batched)
+            {
+                register_shutdown_function(array($instance, 'flush'));
+            }
 
             return $instance;
         });
