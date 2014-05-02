@@ -45,7 +45,16 @@ class RollbarServiceProvider extends ServiceProvider {
 
             $config = array_merge($automatic, Config::get('rollbar::config'));
 
-            return \Rollbar::$instance = new Rollbar($config);
+            // Create Rollbar instance
+            $instance = new Rollbar($config);
+
+            // Prepare Rollbar static class
+            \Rollbar::$instance = $instance;
+
+            // Flush Rollbar on shutdown
+            register_shutdown_function(array($instance, 'flush'));
+
+            return $instance;
         });
     }
 
@@ -77,9 +86,6 @@ class RollbarServiceProvider extends ServiceProvider {
             $rollbar = App::make('rollbar');
             $rollbar->flush();
         });
-
-        // Flush Rollbar on shutdown
-        register_shutdown_function('Rollbar::flush');
     }
 
 }
