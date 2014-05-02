@@ -3,7 +3,7 @@ Laravel Rollbar
 
 [![Build Status](https://travis-ci.org/jenssegers/Laravel-Rollbar.svg)](https://travis-ci.org/jenssegers/Laravel-Rollbar) [![Coverage Status](https://coveralls.io/repos/jenssegers/Laravel-Rollbar/badge.png)](https://coveralls.io/r/jenssegers/Laravel-Rollbar)
 
-Rollbar error monitoring integration for Laravel projects.
+Rollbar error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Rollbar messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application.
 
 ![rollbar](https://d37gvrvc0wt4s1.cloudfront.net/static/img/features-dashboard1.png?ts=1361907905)
 
@@ -32,6 +32,10 @@ Publish the included configuration file:
 And change your rollbar access token:
 
     'access_token' => '',
+
+Because this library uses the queue system, make sure your `config/queue.php` file is configured correctly. If you do not wish to process the jobs in the background, you can set the queue driver to 'sync':
+
+    'default' => 'sync',
 
 Usage
 -----
