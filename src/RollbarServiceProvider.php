@@ -64,11 +64,6 @@ class RollbarServiceProvider extends ServiceProvider {
             if ($message instanceof Exception)
             {
                 $rollbar->report_exception($message);
-
-                // In case of an exception, we will force Rollbar to send the message
-                // immediately. Otherwise, Laravel will not trigger the after filter
-                // that flushes the batched messages.
-                $rollbar->flush();
             }
             else
             {
@@ -82,6 +77,9 @@ class RollbarServiceProvider extends ServiceProvider {
             $rollbar = App::make('rollbar');
             $rollbar->flush();
         });
+
+        // Flush Rollbar on shutdown
+        register_shutdown_function('Rollbar::flush');
     }
 
 }
