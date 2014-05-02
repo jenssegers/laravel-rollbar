@@ -15,6 +15,7 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     public function testBinding()
     {
         $rollbar = App::make('rollbar');
+        $this->assertInstanceOf('Jenssegers\Rollbar\Rollbar', $rollbar);
         $this->assertInstanceOf('RollbarNotifier', $rollbar);
     }
 
@@ -60,7 +61,7 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     {
         $exception = new Exception('Testing error handler');
 
-        $mock = Mockery::mock('RollbarNotifier');
+        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar');
         $mock->shouldReceive('report_message')->once()->with('hello', 'info', array());
         $mock->shouldReceive('report_message')->once()->with('oops', 'error', array('context'));
         $mock->shouldReceive('report_exception')->once()->with($exception);
@@ -73,12 +74,33 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
 
     public function testFlush()
     {
-        $mock = Mockery::mock('RollbarNotifier');
+        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar');
         $mock->shouldReceive('flush')->once();
         $this->app->instance('rollbar', $mock);
 
         Route::enableFilters();
         Event::fire('router.after');
+    }
+
+    public function testQueueGetsPushed()
+    {
+        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar[sendFromJob]');
+        $mock->access_token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
+        $mock->shouldReceive('sendFromJob')->times(0);
+        $this->app->instance('rollbar', $mock);
+
+        Queue::shouldReceive('push')->once();
+        Log::info('hello');
+    }
+
+    public function testQueueGetsFired()
+    {
+        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar[sendFromJob]');
+        $mock->access_token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
+        $mock->shouldReceive('sendFromJob')->times(1);
+        $this->app->instance('rollbar', $mock);
+
+        Log::info('hello');
     }
 
 }

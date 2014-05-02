@@ -3,7 +3,6 @@
 use App;
 use Config;
 use Exception;
-use Rollbar;
 use Illuminate\Support\ServiceProvider;
 
 class RollbarServiceProvider extends ServiceProvider {
@@ -46,8 +45,7 @@ class RollbarServiceProvider extends ServiceProvider {
 
             $config = array_merge($automatic, Config::get('rollbar::config'));
 
-            Rollbar::init($config, false, false);
-            return Rollbar::$instance;
+            return \Rollbar::$instance = new Rollbar($config);
         });
     }
 
