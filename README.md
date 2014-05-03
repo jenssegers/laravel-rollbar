@@ -1,7 +1,7 @@
 Laravel Rollbar
 ===============
 
-[![Build Status](https://travis-ci.org/jenssegers/Laravel-Rollbar.svg)](https://travis-ci.org/jenssegers/Laravel-Rollbar) [![Coverage Status](https://coveralls.io/repos/jenssegers/Laravel-Rollbar/badge.png)](https://coveralls.io/r/jenssegers/Laravel-Rollbar)
+[![Build Status](http://img.shields.io/travis/jenssegers/laravel-rollbar.svg)](https://travis-ci.org/jenssegers/laravel-rollbar) [![Coverage Status](http://img.shields.io/coveralls/jenssegers/laravel-rollbar.svg)](https://coveralls.io/r/jenssegers/laravel-rollbar)
 
 Rollbar error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Rollbar messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application.
 
