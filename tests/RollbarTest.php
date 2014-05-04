@@ -1,6 +1,6 @@
 <?php
 
-class ServiceProviderTest extends Orchestra\Testbench\TestCase {
+class RollbarTest extends Orchestra\Testbench\TestCase {
 
     public function tearDown()
     {
@@ -101,6 +101,16 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->app->instance('rollbar', $mock);
 
         Log::info('hello');
+    }
+
+    public function testSessionData()
+    {
+        Session::set('foo', 'bar');
+
+        $rollbar = App::make('rollbar');
+        $data = $rollbar->build_request_data();
+
+        $this->assertEquals($data['session'], Session::all());
     }
 
 }
