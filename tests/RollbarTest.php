@@ -33,20 +33,20 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $rollbar = App::make('rollbar');
         $this->assertEquals(App::environment(), $rollbar->environment);
         $this->assertEquals(base_path(), $rollbar->root);
-        $this->assertEquals(E_USER_NOTICE, $rollbar->max_errno);
+        $this->assertEquals(E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR, $rollbar->included_errno);
         $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
     }
 
     public function testCustomConfiguration()
     {
         Config::set('rollbar::root', '/tmp');
-        Config::set('rollbar::max_errno', E_ERROR);
+        Config::set('rollbar::included_errno', E_ERROR);
         Config::set('rollbar::environment', 'staging');
 
         $rollbar = App::make('rollbar');
         $this->assertEquals('staging', $rollbar->environment);
         $this->assertEquals('/tmp', $rollbar->root);
-        $this->assertEquals(E_ERROR, $rollbar->max_errno);
+        $this->assertEquals(E_ERROR, $rollbar->included_errno);
         $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
     }
 

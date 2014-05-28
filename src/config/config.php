@@ -11,7 +11,7 @@ return array(
     | instance. For more information about the possible values check
     | out: https://rollbar.com/docs/notifier/rollbar-php
     |
-    | Example: "access_token", "batch_size", "max_errno", "scrub_fields", ...
+    | Example: "access_token", "batch_size", "included_errno", "scrub_fields", ...
     |
     */
 
