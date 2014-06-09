@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": ">=5.3",
-        "rollbar/rollbar": "*"
+        "illuminate/support": "4.*",
+        "rollbar/rollbar": "0.9.*"
     },
     "require-dev": {
         "orchestra/testbench": "2.1.*",
