@@ -7,7 +7,7 @@ use Illuminate\Queue\QueueManager;
 class Rollbar extends RollbarNotifier {
 
     /**
-     * The queue connection.
+     * The queue manager instance.
      *
      * @var \Illuminate\Queue\QueueManager
      */
