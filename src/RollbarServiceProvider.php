@@ -36,8 +36,6 @@ class RollbarServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $app = $this->app;
-
         $this->app->bindShared('rollbar', function($app)
         {
             // Automatic values
