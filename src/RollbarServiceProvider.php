@@ -46,16 +46,11 @@ class RollbarServiceProvider extends ServiceProvider {
                 'root' => base_path()
             );
 
-            // Check services configuration file.
-            if ($config = Config::get('services.rollbar'))
-            {
-                $config = array_merge($automatic, $config);
-            }
-            // Use package configuration file.
-            else
-            {
-                $config = array_merge($automatic, Config::get('rollbar::config'));
-            }
+            // Check the configuration files.
+            $config = Config::get('services.rollbar') ?: Config::get('rollbar::config');
+
+            // Merge automatic values
+            $config = array_merge($automatic, $config);
 
             // Create Rollbar instance
             $instance = new Rollbar($config, $app['queue']);
