@@ -41,7 +41,7 @@ Publish the included configuration file:
 
 And change your rollbar access token:
 
-    'access_token' => '',
+    'access_token' => 'your-rollbar-token',
 
 ### Attention!
 
