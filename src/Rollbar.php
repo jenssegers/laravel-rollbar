@@ -41,7 +41,7 @@ class Rollbar extends RollbarNotifier {
      */
     protected function send_payload($payload)
     {
-        // If we have a QueueInterface instance, we will push the payload as
+        // If we have a QueueManager instance, we will push the payload as
         // a job to the queue instead of sending it to Rollbar directly.
         if ($this->queue)
         {
