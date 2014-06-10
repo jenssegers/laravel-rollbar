@@ -1,17 +1,39 @@
 <?php namespace Jenssegers\Rollbar;
 
-use Queue;
 use Session;
 use RollbarNotifier;
+use Illuminate\Queue\QueueManager;
 
 class Rollbar extends RollbarNotifier {
 
     /**
+     * The queue connection.
+     *
+     * @var \Illuminate\Queue\QueueManager
+     */
+    protected $queue;
+
+    /**
      * Constructor.
      */
-    public function __construct($config = array())
+    public function __construct($config = array(), QueueManager $queue = null)
     {
         parent::__construct($config);
+
+        $this->setQueue($queue);
+    }
+
+    /**
+     * Set the queue manager instance.
+     *
+     * @param  \Illuminate\Queue\QueueManager  $queue
+     * @return \Jenssegers\Rollbar\Rollbar
+     */
+    public function setQueue(QueueManager $queue = null)
+    {
+        $this->queue = $queue;
+
+        return $this;
     }
 
     /**
@@ -19,8 +41,18 @@ class Rollbar extends RollbarNotifier {
      */
     protected function send_payload($payload)
     {
-        // Push the job to the queue instead of sending it to Rollbar directly.
-        Queue::push('Jenssegers\Rollbar\Job', $payload);
+        // If we have a QueueInterface instance, we will push the payload as
+        // a job to the queue instead of sending it to Rollbar directly.
+        if ($this->queue)
+        {
+            $this->queue->push('Jenssegers\Rollbar\Job', $payload);
+        }
+
+        // Otherwise we will just execute the original send_payload method.
+        else
+        {
+            return parent::send_payload($payload);
+        }
     }
 
     /**
@@ -30,7 +62,7 @@ class Rollbar extends RollbarNotifier {
     {
         $request = parent::build_request_data();
 
-        // Add Laravel session data
+        // Add Laravel session data to the request data.
         if ($session = Session::all())
         {
             $session = $this->scrub_request_params($session);

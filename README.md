@@ -25,6 +25,16 @@ Add the service provider in `app/config/app.php`:
 Configuration
 -------------
 
+### Option 1: Services configuration file
+
+This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Rollbar:
+
+    'rollbar' => array(
+        'access_token' => 'your-rollbar-token',
+    ),
+
+### Option 2: The package configuration file
+
 Publish the included configuration file:
 
     php artisan config:publish jenssegers/rollbar
@@ -32,6 +42,8 @@ Publish the included configuration file:
 And change your rollbar access token:
 
     'access_token' => '',
+
+### Attention!
 
 Because this library uses the queue system, make sure your `config/queue.php` file is configured correctly. If you do not wish to process the jobs in the background, you can set the queue driver to 'sync':
 

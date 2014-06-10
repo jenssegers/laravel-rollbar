@@ -2,6 +2,14 @@
 
 class RollbarTest extends Orchestra\Testbench\TestCase {
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
+        Config::set('rollbar::access_token', $this->token);
+    }
+
     public function tearDown()
     {
         Mockery::close();
@@ -21,11 +29,8 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
     public function testPassConfiguration()
     {
-        $token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-        Config::set('rollbar::access_token', $token);
-
         $rollbar = App::make('rollbar');
-        $this->assertEquals($token, $rollbar->access_token);
+        $this->assertEquals($this->token, $rollbar->access_token);
     }
 
     public function testDefaultConfiguration()
@@ -48,6 +53,15 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals('/tmp', $rollbar->root);
         $this->assertEquals(E_ERROR, $rollbar->included_errno);
         $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
+    }
+
+    public function testServicesConfiguration()
+    {
+        $token = '00000000000000000000000000000000';
+        Config::set('services.rollbar.access_token', $token);
+
+        $rollbar = App::make('rollbar');
+        $this->assertEquals($token, $rollbar->access_token);
     }
 
     public function testIsSingleton()
@@ -84,21 +98,18 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
     public function testQueueGetsPushed()
     {
-        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar[sendFromJob]');
-        $mock->access_token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-        $mock->shouldReceive('sendFromJob')->times(0);
-        $this->app->instance('rollbar', $mock);
+        $mock = Mockery::mock('Illuminate\Queue\QueueManager');
+        $mock->shouldReceive('push')->once();
+        $this->app->instance('queue', $mock);
 
-        Queue::shouldReceive('push')->once();
         Log::info('hello');
     }
 
     public function testQueueGetsFired()
     {
-        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar[sendFromJob]');
-        $mock->access_token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-        $mock->shouldReceive('sendFromJob')->times(1);
-        $this->app->instance('rollbar', $mock);
+        $mock = Mockery::mock('Jenssegers\Rollbar\Job');
+        $mock->shouldReceive('fire')->once();
+        $this->app->instance('Jenssegers\Rollbar\Job', $mock);
 
         Log::info('hello');
     }

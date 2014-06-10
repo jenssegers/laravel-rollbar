@@ -2,6 +2,7 @@
 
 use App;
 use Config;
+use Queue;
 use Exception;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,27 +36,32 @@ class RollbarServiceProvider extends ServiceProvider {
      */
     public function register()
     {
+        $app = $this->app;
+
         $this->app->bindShared('rollbar', function($app)
         {
             // Automatic values
             $automatic = array(
-                'environment' => App::environment(),
+                'environment' => $app->environment(),
                 'root' => base_path()
             );
 
-            $config = array_merge($automatic, Config::get('rollbar::config'));
+            // Check services configuration file.
+            if ($config = Config::get('services.rollbar'))
+            {
+                $config = array_merge($automatic, $config);
+            }
+            // Use package configuration file.
+            else
+            {
+                $config = array_merge($automatic, Config::get('rollbar::config'));
+            }
 
             // Create Rollbar instance
-            $instance = new Rollbar($config);
+            $instance = new Rollbar($config, $app['queue']);
 
             // Prepare Rollbar static class
             \Rollbar::$instance = $instance;
-
-            // Flush Rollbar on shutdown
-            if ($instance->batched)
-            {
-                register_shutdown_function(array($instance, 'flush'));
-            }
 
             return $instance;
         });
