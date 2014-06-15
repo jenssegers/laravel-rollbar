@@ -83,7 +83,7 @@ class RollbarServiceProvider extends ServiceProvider {
         });
 
         // Register after filter
-        $this->app->after(function()
+        $this->app->shutdown(function()
         {
             $rollbar = App::make('rollbar');
             $rollbar->flush();

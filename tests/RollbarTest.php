@@ -93,7 +93,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->app->instance('rollbar', $mock);
 
         Route::enableFilters();
-        Event::fire('router.after');
+        $this->app->shutdown();
     }
 
     public function testQueueGetsPushed()
