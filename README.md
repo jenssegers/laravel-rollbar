@@ -59,6 +59,6 @@ This library adds a listener to Laravel's logging system. To monitor exceptions,
         Log::error($exception);
     });
 
-Your other log messages will also be sent to Sentry:
+Your other log messages will also be sent to Rollbar:
 
     Log::info('Here is some debug information', array('context'));
