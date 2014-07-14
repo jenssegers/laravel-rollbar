@@ -15,7 +15,7 @@
         "rollbar/rollbar": "0.9.*"
     },
     "require-dev": {
-        "orchestra/testbench": "2.1.*",
+        "orchestra/testbench": "2.2.*",
         "mockery/mockery": "*"
     },
     "autoload": {
