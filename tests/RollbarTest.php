@@ -6,8 +6,8 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
     {
         parent::setUp();
 
-        $this->token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-        Config::set('rollbar::access_token', $this->token);
+        $this->access_token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
+        $this->app->config->set('services.rollbar.access_token', $this->access_token);
     }
 
     public function tearDown()
@@ -17,111 +17,138 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
     protected function getPackageProviders()
     {
-        return array('Jenssegers\Rollbar\RollbarServiceProvider');
+        return ['Jenssegers\Rollbar\RollbarServiceProvider'];
     }
 
     public function testBinding()
     {
-        $rollbar = App::make('rollbar');
-        $this->assertInstanceOf('Jenssegers\Rollbar\Rollbar', $rollbar);
-        $this->assertInstanceOf('RollbarNotifier', $rollbar);
-    }
+        $client = $this->app->make('rollbar.client');
+        $this->assertInstanceOf('RollbarNotifier', $client);
 
-    public function testPassConfiguration()
-    {
-        $rollbar = App::make('rollbar');
-        $this->assertEquals($this->token, $rollbar->access_token);
-    }
-
-    public function testDefaultConfiguration()
-    {
-        $rollbar = App::make('rollbar');
-        $this->assertEquals(App::environment(), $rollbar->environment);
-        $this->assertEquals(base_path(), $rollbar->root);
-        $this->assertEquals(E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR, $rollbar->included_errno);
-        $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
-    }
-
-    public function testCustomConfiguration()
-    {
-        Config::set('rollbar::root', '/tmp');
-        Config::set('rollbar::included_errno', E_ERROR);
-        Config::set('rollbar::environment', 'staging');
-
-        $rollbar = App::make('rollbar');
-        $this->assertEquals('staging', $rollbar->environment);
-        $this->assertEquals('/tmp', $rollbar->root);
-        $this->assertEquals(E_ERROR, $rollbar->included_errno);
-        $this->assertEquals('https://api.rollbar.com/api/1/', $rollbar->base_api_url);
-    }
-
-    public function testServicesConfiguration()
-    {
-        $token = '00000000000000000000000000000000';
-        Config::set('services.rollbar.access_token', $token);
-
-        $rollbar = App::make('rollbar');
-        $this->assertEquals($token, $rollbar->access_token);
+        $handler = $this->app->make('rollbar.handler');
+        $this->assertInstanceOf('Jenssegers\Rollbar\RollbarLogHandler', $handler);
     }
 
     public function testIsSingleton()
     {
-        $rollbar1 = App::make('rollbar');
-        $rollbar2 = App::make('rollbar');
-        $this->assertEquals(spl_object_hash($rollbar1), spl_object_hash($rollbar2));
+        $handler1 = $this->app->make('rollbar.handler');
+        $handler2 = $this->app->make('rollbar.handler');
+        $this->assertEquals(spl_object_hash($handler1), spl_object_hash($handler2));
     }
 
-    public function testRegisterLogListener()
+    public function testFacade()
+    {
+        $client = Rollbar::$instance;
+        $this->assertInstanceOf('RollbarNotifier', $client);
+    }
+
+    public function testPassConfiguration()
+    {
+        $client = $this->app->make('rollbar.client');
+        $this->assertEquals($this->access_token, $client->access_token);
+    }
+
+    public function testCustomConfiguration()
+    {
+        $this->app->config->set('services.rollbar.root', '/tmp');
+        $this->app->config->set('services.rollbar.included_errno', E_ERROR);
+        $this->app->config->set('services.rollbar.environment', 'staging');
+
+        $client = $this->app->make('rollbar.client');
+        $this->assertEquals('staging', $client->environment);
+        $this->assertEquals('/tmp', $client->root);
+        $this->assertEquals(E_ERROR, $client->included_errno);
+    }
+
+    public function testAutomaticContext()
+    {
+        $this->app->session->set('foo', 'bar');
+
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('report_message')->once()->with("Test log message", "info", []);
+
+        $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
+        $handlerMock->shouldReceive('log')->passthru();
+        $this->app['rollbar.handler'] = $handlerMock;
+
+        $handler = $this->app->make('rollbar.handler');
+        $handler->log('info', 'Test log message');
+
+        $this->assertEquals([
+            'session' => ['foo' => 'bar'],
+            'id' => $this->app->session->getId()
+        ], $clientMock->person);
+    }
+
+    public function testMergedContext()
+    {
+        $this->app->session->set('foo', 'bar');
+
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('report_message')->once()->with("Test log message", "info", [
+            'tags' => ['one' => 'two']
+        ]);
+
+        $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
+        $handlerMock->shouldReceive('log')->passthru();
+        $this->app['rollbar.handler'] = $handlerMock;
+
+        $handler = $this->app->make('rollbar.handler');
+        $handler->log('info', 'Test log message', [
+            'tags' => ['one' => 'two'],
+            'person' => ['id' => 1337, 'email' => 'john@doe.com']
+        ]);
+
+        $this->assertEquals([
+            'session' => ['foo' => 'bar'],
+            'id' => 1337,
+            'email' => 'john@doe.com'
+        ], $clientMock->person);
+    }
+
+    public function testLogListener()
     {
         $exception = new Exception('Testing error handler');
 
-        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar');
-        $mock->shouldReceive('report_message')->once()->with('hello', 'info', array());
-        $mock->shouldReceive('report_message')->once()->with('oops', 'error', array('context'));
-        $mock->shouldReceive('report_exception')->once()->with($exception);
-        $this->app->instance('rollbar', $mock);
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('report_message')->times(2);
+        $clientMock->shouldReceive('report_exception')->times(1)->with($exception);
 
-        Log::info('hello');
-        Log::error('oops', array('context'));
-        Log::error($exception);
+        $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
+        $handlerMock->shouldReceive('log')->passthru();
+        $this->app['rollbar.handler'] = $handlerMock;
+
+        $this->app->log->info('hello');
+        $this->app->log->error('oops');
+        $this->app->log->error($exception);
     }
 
-    public function testFlush()
+    public function testBelowLevel()
     {
-        $mock = Mockery::mock('Jenssegers\Rollbar\Rollbar');
-        $mock->shouldReceive('flush')->once();
-        $this->app->instance('rollbar', $mock);
+        $this->app->config->set('services.rollbar.level', 'error');
 
-        Route::enableFilters();
-        $this->app->shutdown();
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('report_message')->times(0);
+        $this->app['rollbar.client'] = $clientMock;
+
+        $this->app->log->info('hello');
+        $this->app->log->debug('hello');
+        $this->app->log->notice('hello');
+        $this->app->log->warning('hello');
     }
 
-    public function testQueueGetsPushed()
+    public function testAboveLevel()
     {
-        $mock = Mockery::mock('Illuminate\Queue\QueueManager');
-        $mock->shouldReceive('push')->once();
-        $this->app->instance('queue', $mock);
+        $this->app->config->set('services.rollbar.level', 'error');
 
-        Log::info('hello');
-    }
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('report_message')->times(4);
+        $this->app['rollbar.client'] = $clientMock;
 
-    public function testQueueGetsFired()
-    {
-        $mock = Mockery::mock('Jenssegers\Rollbar\Job');
-        $mock->shouldReceive('fire')->once();
-        $this->app->instance('Jenssegers\Rollbar\Job', $mock);
-
-        Log::info('hello');
-    }
-
-    public function testSessionData()
-    {
-        Session::set('foo', 'bar');
-
-        $rollbar = App::make('rollbar');
-        $data = $rollbar->build_request_data();
-
-        $this->assertEquals($data['session'], Session::all());
+        $this->app->log->error('hello');
+        $this->app->log->critical('hello');
+        $this->app->log->alert('hello');
+        $this->app->log->emergency('hello');
     }
 
 }

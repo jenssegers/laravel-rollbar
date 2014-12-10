@@ -1,9 +1,6 @@
 <?php namespace Jenssegers\Rollbar;
 
-use App;
-use Config;
-use Queue;
-use Exception;
+use Exception, RollbarNotifier, Rollbar;
 use Illuminate\Support\ServiceProvider;
 
 class RollbarServiceProvider extends ServiceProvider {
@@ -25,8 +22,19 @@ class RollbarServiceProvider extends ServiceProvider {
         // Fix for PSR-4
         $this->package('jenssegers/rollbar', 'rollbar', realpath(__DIR__));
 
-        // Register listeners
-        $this->registerListeners();
+        $app = $this->app;
+
+        // Listen to log messages.
+        $app['log']->listen(function($level, $message, $context) use ($app)
+        {
+            $app['rollbar.handler']->log($level, $message, $context);
+        });
+
+        // Register shutdown callback
+        $this->app->shutdown(function() use ($app)
+        {
+            $app['rollbar.client']->flush();
+        });
     }
 
     /**
@@ -36,57 +44,24 @@ class RollbarServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bindShared('rollbar', function($app)
+        $app = $this->app;
+
+        $this->app['rollbar.client'] = $this->app->share(function($app)
         {
-            // Automatic values
-            $automatic = array(
-                'environment' => $app->environment(),
-                'root' => base_path()
-            );
+            $config = $app['config']->get('services.rollbar');
 
-            // Check the configuration files.
-            $config = Config::get('services.rollbar') ?: Config::get('rollbar::config');
+            Rollbar::$instance = $rollbar = new RollbarNotifier($config);
 
-            // Merge automatic values
-            $config = array_merge($automatic, $config);
-
-            // Create Rollbar instance
-            $instance = new Rollbar($config, $app['queue']);
-
-            // Prepare Rollbar static class
-            \Rollbar::$instance = $instance;
-
-            return $instance;
-        });
-    }
-
-    /**
-     * Register error and log listeners.
-     *
-     * @return void
-     */
-    protected function registerListeners()
-    {
-        // Register log listener
-        $this->app->log->listen(function($level, $message, $context)
-        {
-            $rollbar = App::make('rollbar');
-
-            if ($message instanceof Exception)
-            {
-                $rollbar->report_exception($message);
-            }
-            else
-            {
-                $rollbar->report_message($message, $level, $context);
-            }
+            return $rollbar;
         });
 
-        // Register after filter
-        $this->app->shutdown(function()
+        $this->app['rollbar.handler'] = $this->app->share(function($app)
         {
-            $rollbar = App::make('rollbar');
-            $rollbar->flush();
+            $client = $app['rollbar.client'];
+
+            $level = $app['config']->get('services.rollbar.level', 'debug');
+
+            return new RollbarLogHandler($client, $app, $level);
         });
     }
 

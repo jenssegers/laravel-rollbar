@@ -5,6 +5,8 @@ Laravel Rollbar
 
 Rollbar error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Rollbar messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application. Laravel's session data will also be sent to Rollbar.
 
+Rollbar error monitoring integration for Laravel projects. This library adds a listener to Laravel's logging component. Laravel's session information will be sent in to Rollbar, as well as some other helpful information such as 'environment', 'server', and 'session'.
+
 ![rollbar](https://d37gvrvc0wt4s1.cloudfront.net/static/img/features-dashboard1.png?ts=1361907905)
 
 Installation
@@ -21,34 +23,19 @@ Add the service provider in `app/config/app.php`:
 Configuration
 -------------
 
-### Option 1: Services configuration file
-
 This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Rollbar:
 
     'rollbar' => array(
         'access_token' => 'your-rollbar-token',
+        'level' => 'debug'
     ),
 
-### Option 2: The package configuration file
-
-Publish the included configuration file:
-
-    php artisan config:publish jenssegers/rollbar
-
-And change your rollbar access token:
-
-    'access_token' => 'your-rollbar-token',
-
-### Attention!
-
-Because this library uses the queue system, make sure your `config/queue.php` file is configured correctly. If you do not wish to process the jobs in the background, you can set the queue driver to 'sync':
-
-    'default' => 'sync',
+The level variable defines the minimum log level at which log messages are sent to Rollbar. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.
 
 Usage
 -----
 
-This library adds a listener to Laravel's logging system. To monitor exceptions, simply use the `Log` facade:
+To monitor exceptions, simply use the `Log` facade:
 
     App::error(function(Exception $exception, $code)
     {
@@ -57,4 +44,18 @@ This library adds a listener to Laravel's logging system. To monitor exceptions,
 
 Your other log messages will also be sent to Rollbar:
 
-    Log::info('Here is some debug information', array('context'));
+    Log::debug('Here is some debug information');
+
+### Context informaton
+
+You can pass user information as context like this:
+
+    Log::error('Something went wrong', [
+        'person' => ['id' => 123, name' => 'John Doe', 'email' => 'john@doe.com']
+    ]);
+
+Or pass some extra information:
+
+    Log::warning('Something went wrong', [
+        'download_size' => 3432425235
+    ]);
