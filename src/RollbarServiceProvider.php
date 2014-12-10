@@ -30,8 +30,14 @@ class RollbarServiceProvider extends ServiceProvider {
             $app['rollbar.handler']->log($level, $message, $context);
         });
 
-        // Register shutdown callback
+        // Register Laravel shutdown function
         $this->app->shutdown(function() use ($app)
+        {
+            $app['rollbar.client']->flush();
+        });
+
+        // Register PHP shutdown function
+        register_shutdown_function(function () use ($app)
         {
             $app['rollbar.client']->flush();
         });
