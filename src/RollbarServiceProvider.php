@@ -1,6 +1,7 @@
 <?php namespace Jenssegers\Rollbar;
 
-use Exception, RollbarNotifier, Rollbar;
+use Exception, InvalidArgumentException;
+use RollbarNotifier, Rollbar;
 use Illuminate\Support\ServiceProvider;
 
 class RollbarServiceProvider extends ServiceProvider {
@@ -37,7 +38,7 @@ class RollbarServiceProvider extends ServiceProvider {
         });
 
         // Register PHP shutdown function
-        register_shutdown_function(function () use ($app)
+        register_shutdown_function(function() use ($app)
         {
             $app['rollbar.client']->flush();
         });
@@ -55,6 +56,11 @@ class RollbarServiceProvider extends ServiceProvider {
         $this->app['rollbar.client'] = $this->app->share(function($app)
         {
             $config = $app['config']->get('services.rollbar');
+
+            if (empty($config['access_token']))
+            {
+                throw new InvalidArgumentException('Rollbar access token not configured');
+            }
 
             Rollbar::$instance = $rollbar = new RollbarNotifier($config);
 

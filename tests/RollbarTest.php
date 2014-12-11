@@ -42,6 +42,14 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->assertInstanceOf('RollbarNotifier', $client);
     }
 
+    public function testNoConfiguration()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+
+        $this->app->config->set('services.rollbar.access_token', null);
+        $client = $this->app->make('rollbar.client');
+    }
+
     public function testPassConfiguration()
     {
         $client = $this->app->make('rollbar.client');
