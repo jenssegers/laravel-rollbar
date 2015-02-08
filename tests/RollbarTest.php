@@ -13,6 +13,8 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
     public function tearDown()
     {
         Mockery::close();
+
+        parent::tearDown();
     }
 
     protected function getPackageProviders($app)
@@ -157,6 +159,26 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->app->log->critical('hello');
         $this->app->log->alert('hello');
         $this->app->log->emergency('hello');
+    }
+
+    public function testFlushOnTerminate()
+    {
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('flush')->once();
+        $this->app['rollbar.client'] = $clientMock;
+
+        $handler = $this->app->make('rollbar.handler');
+
+        $this->app->terminate();
+    }
+
+    public function testDontFlushIfUnresolved()
+    {
+        $clientMock = Mockery::mock('RollbarNotifier');
+        $clientMock->shouldReceive('flush')->times(0);
+        $this->app['rollbar.client'] = $clientMock;
+
+        $this->app->terminate();
     }
 
 }
