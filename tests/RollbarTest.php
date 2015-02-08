@@ -15,7 +15,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         Mockery::close();
     }
 
-    protected function getPackageProviders()
+    protected function getPackageProviders($app)
     {
         return ['Jenssegers\Rollbar\RollbarServiceProvider'];
     }

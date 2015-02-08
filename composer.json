@@ -15,7 +15,7 @@
         "rollbar/rollbar": "0.9.*"
     },
     "require-dev": {
-        "orchestra/testbench": "2.2.*",
+        "orchestra/testbench": "3.0.*",
         "mockery/mockery": "*",
         "satooshi/php-coveralls": "*"
     },
