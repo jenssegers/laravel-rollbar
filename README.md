@@ -49,7 +49,7 @@ Your other log messages will also be sent to Rollbar:
 You can pass user information as context like this:
 
     Log::error('Something went wrong', [
-        'person' => ['id' => 123, name' => 'John Doe', 'email' => 'john@doe.com']
+        'person' => ['id' => 123, 'username' => 'John Doe', 'email' => 'john@doe.com']
     ]);
 
 Or pass some extra information:
