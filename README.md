@@ -33,7 +33,16 @@ The level variable defines the minimum log level at which log messages are sent 
 Usage
 -----
 
-To monitor exceptions, simply use the `Log` facade:
+To automatically monitor exceptions, simply use the `Log` facade in your error handler in `app/Exceptions/Handler.php`:
+
+    public function report(Exception $e)
+    {
+        Log::error($e);
+
+        return parent::report($e);
+    }
+
+For Laravel 4 installations, this is located in `app/start/global.php`:
 
     App::error(function(Exception $exception, $code)
     {
