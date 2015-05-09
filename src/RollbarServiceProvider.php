@@ -1,7 +1,8 @@
 <?php namespace Jenssegers\Rollbar;
 
-use Exception, InvalidArgumentException;
-use RollbarNotifier, Rollbar;
+use InvalidArgumentException;
+use RollbarNotifier;
+use Rollbar;
 use Illuminate\Support\ServiceProvider;
 
 class RollbarServiceProvider extends ServiceProvider {
@@ -23,13 +24,13 @@ class RollbarServiceProvider extends ServiceProvider {
         $app = $this->app;
 
         // Listen to log messages.
-        $app['log']->listen(function($level, $message, $context) use ($app)
+        $app['log']->listen(function ($level, $message, $context) use ($app)
         {
             $app['rollbar.handler']->log($level, $message, $context);
         });
 
         // Flush callback
-        $flush = function() use ($app)
+        $flush = function () use ($app)
         {
             if ($app->resolved('rollbar.client'))
             {
@@ -61,7 +62,7 @@ class RollbarServiceProvider extends ServiceProvider {
     {
         $app = $this->app;
 
-        $this->app['rollbar.client'] = $this->app->share(function($app)
+        $this->app['rollbar.client'] = $this->app->share(function ($app)
         {
             $config = $app['config']->get('services.rollbar');
 
@@ -75,7 +76,7 @@ class RollbarServiceProvider extends ServiceProvider {
             return $rollbar;
         });
 
-        $this->app['rollbar.handler'] = $this->app->share(function($app)
+        $this->app['rollbar.handler'] = $this->app->share(function ($app)
         {
             $client = $app['rollbar.client'];
 

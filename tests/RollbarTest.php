@@ -86,7 +86,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
         $this->assertEquals([
             'session' => ['foo' => 'bar'],
-            'id' => $this->app->session->getId()
+            'id'      => $this->app->session->getId(),
         ], $clientMock->person);
     }
 
@@ -96,7 +96,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
         $clientMock = Mockery::mock('RollbarNotifier');
         $clientMock->shouldReceive('report_message')->once()->with("Test log message", "info", [
-            'tags' => ['one' => 'two']
+            'tags' => ['one' => 'two'],
         ]);
 
         $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
@@ -105,14 +105,14 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
         $handler = $this->app->make('rollbar.handler');
         $handler->log('info', 'Test log message', [
-            'tags' => ['one' => 'two'],
-            'person' => ['id' => 1337, 'email' => 'john@doe.com']
+            'tags'   => ['one' => 'two'],
+            'person' => ['id'  => 1337, 'email' => 'john@doe.com'],
         ]);
 
         $this->assertEquals([
             'session' => ['foo' => 'bar'],
-            'id' => 1337,
-            'email' => 'john@doe.com'
+            'id'      => 1337,
+            'email'   => 'john@doe.com',
         ], $clientMock->person);
     }
 
