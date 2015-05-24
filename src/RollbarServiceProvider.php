@@ -28,29 +28,6 @@ class RollbarServiceProvider extends ServiceProvider {
         {
             $app['rollbar.handler']->log($level, $message, $context);
         });
-
-        // Flush callback
-        $flush = function () use ($app)
-        {
-            if ($app->resolved('rollbar.client'))
-            {
-                $app['rollbar.client']->flush();
-            }
-        };
-
-        if (method_exists($app, 'version') and starts_with($app->version(), '5'))
-        {
-            // Register Laravel 5 shutdown function
-            $this->app->terminating($flush);
-        }
-        else
-        {
-            // Register Laravel 4 shutdown function
-            $this->app->shutdown($flush);
-        }
-
-        // Register PHP shutdown function
-        register_shutdown_function($flush);
     }
 
     /**
@@ -83,6 +60,25 @@ class RollbarServiceProvider extends ServiceProvider {
             $level = $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($client, $app, $level);
+        });
+
+        // If the Rollbar client was resolved, then there is a possibility that there
+        // are unsent error messages in the internal queue, so let's flush them.
+        register_shutdown_function(function () use ($app)
+        {
+            if ($app->resolved('rollbar.client'))
+            {
+                $app['rollbar.client']->flush();
+            }
+        });
+
+        // Register the fatal error handler.
+        register_shutdown_function(function () use ($app)
+        {
+            if (isset($app['rollbar.client']))
+            {
+                Rollbar::report_fatal_error();
+            }
         });
     }
 
