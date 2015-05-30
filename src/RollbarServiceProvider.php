@@ -77,6 +77,8 @@ class RollbarServiceProvider extends ServiceProvider {
         {
             if (isset($app['rollbar.client']))
             {
+                $app->make('rollbar.client');
+
                 Rollbar::report_fatal_error();
             }
         });
