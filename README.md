@@ -14,7 +14,7 @@ Install using composer:
 
     composer require jenssegers/rollbar
 
-Add the service provider in `app/config/app.php`:
+Add the service provider to the `'providers'` array in `config/app.php`:
 
     'Jenssegers\Rollbar\RollbarServiceProvider',
 
@@ -37,7 +37,7 @@ To automatically monitor exceptions, simply use the `Log` facade in your error h
 
     public function report(Exception $e)
     {
-        Log::error($e);
+        \Log::error($e);
 
         return parent::report($e);
     }
@@ -51,18 +51,18 @@ For Laravel 4 installations, this is located in `app/start/global.php`:
 
 Your other log messages will also be sent to Rollbar:
 
-    Log::debug('Here is some debug information');
+    \Log::debug('Here is some debug information');
 
 ### Context informaton
 
 You can pass user information as context like this:
 
-    Log::error('Something went wrong', [
+    \Log::error('Something went wrong', [
         'person' => ['id' => 123, 'username' => 'John Doe', 'email' => 'john@doe.com']
     ]);
 
 Or pass some extra information:
 
-    Log::warning('Something went wrong', [
+    \Log::warning('Something went wrong', [
         'download_size' => 3432425235
     ]);
