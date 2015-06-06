@@ -92,6 +92,10 @@ class RollbarLogHandler {
                 $this->rollbar->person = $context['person'];
                 unset($context['person']);
             }
+            else
+            {
+                $this->rollbar->person = call_user_func($this->rollbar->person_fn);
+            }
 
             // Add user session information.
             if (isset($this->rollbar->person['session']))
