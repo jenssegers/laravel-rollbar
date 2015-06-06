@@ -94,7 +94,12 @@ class RollbarLogHandler {
             }
             else
             {
-                $this->rollbar->person = call_user_func($this->rollbar->person_fn);
+                if ($this->rollbar->person_fn && is_callable($this->rollbar->person_fn)) {
+                    $data = @call_user_func($this->rollbar->person_fn);
+                    if (isset($data['id'])) {
+                        $this->rollbar->person = call_user_func($this->rollbar->person_fn);
+                    }
+                }
             }
 
             // Add user session information.
