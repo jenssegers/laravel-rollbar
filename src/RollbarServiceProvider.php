@@ -66,7 +66,7 @@ class RollbarServiceProvider extends ServiceProvider {
         // are unsent error messages in the internal queue, so let's flush them.
         register_shutdown_function(function () use ($app)
         {
-            if ($app->resolved('rollbar.client'))
+            if (isset($app['rollbar.client']))
             {
                 $app['rollbar.client']->flush();
             }
