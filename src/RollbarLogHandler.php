@@ -83,7 +83,7 @@ class RollbarLogHandler {
         {
             if (empty($this->rollbar->person) or ! is_array($this->rollbar->person))
             {
-                $this->rollbar->person = [];
+                $this->rollbar->person = array();
             }
 
             // Merge person context.
