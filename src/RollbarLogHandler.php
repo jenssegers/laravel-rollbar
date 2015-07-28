@@ -40,7 +40,7 @@ class RollbarLogHandler {
         $this->level = $this->parseLevel($level ?: 'debug');
 
         // Set Laravel information
-        $this->rollbar->environment = $this->app->environment();
+        $this->rollbar->environment = $this->app['config']->get('services.rollbar.environment', $this->app->environment());
         $this->rollbar->root = base_path();
     }
 
