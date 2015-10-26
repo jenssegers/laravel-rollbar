@@ -1,9 +1,9 @@
 <?php namespace Jenssegers\Rollbar;
 
-use InvalidArgumentException;
-use RollbarNotifier;
-use Rollbar;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
+use Rollbar;
+use RollbarNotifier;
 
 class RollbarServiceProvider extends ServiceProvider {
 
@@ -16,8 +16,6 @@ class RollbarServiceProvider extends ServiceProvider {
 
     /**
      * Bootstrap the application events.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -26,22 +24,25 @@ class RollbarServiceProvider extends ServiceProvider {
         // Listen to log messages.
         $app['log']->listen(function ($level, $message, $context) use ($app)
         {
-            $app['rollbar.handler']->log($level, $message, $context);
+            $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
         });
     }
 
     /**
      * Register the service provider.
-     *
-     * @return void
      */
     public function register()
     {
         $app = $this->app;
 
-        $this->app['rollbar.client'] = $this->app->share(function ($app)
+        $this->app['RollbarNotifier'] = $this->app->share(function ($app)
         {
-            $config = $app['config']->get('services.rollbar');
+            $defaults = [
+                'environment' => $app->environment(),
+                'root'        => $app->basePath(),
+            ];
+
+            $config = array_merge($defaults, $app['config']->get('services.rollbar'));
 
             if (empty($config['access_token']))
             {
@@ -53,9 +54,9 @@ class RollbarServiceProvider extends ServiceProvider {
             return $rollbar;
         });
 
-        $this->app['rollbar.handler'] = $this->app->share(function ($app)
+        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $this->app->share(function ($app)
         {
-            $client = $app['rollbar.client'];
+            $client = $app['RollbarNotifier'];
 
             $level = $app['config']->get('services.rollbar.level', 'debug');
 
@@ -66,18 +67,18 @@ class RollbarServiceProvider extends ServiceProvider {
         // are unsent error messages in the internal queue, so let's flush them.
         register_shutdown_function(function () use ($app)
         {
-            if (isset($app['rollbar.client']))
+            if (isset($app['RollbarNotifier']))
             {
-                $app['rollbar.client']->flush();
+                $app['RollbarNotifier']->flush();
             }
         });
 
         // Register the fatal error handler.
         register_shutdown_function(function () use ($app)
         {
-            if (isset($app['rollbar.client']))
+            if (isset($app['RollbarNotifier']))
             {
-                $app->make('rollbar.client');
+                $app->make('RollbarNotifier');
 
                 Rollbar::report_fatal_error();
             }

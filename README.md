@@ -25,7 +25,7 @@ This package supports configuration through the services configuration file loca
 
     'rollbar' => array(
         'access_token' => 'your-rollbar-token',
-        'level' => 'debug'
+        'level' => 'debug',
     ),
 
 The level variable defines the minimum log level at which log messages are sent to Rollbar. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.

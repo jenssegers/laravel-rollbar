@@ -1,9 +1,9 @@
 <?php namespace Jenssegers\Rollbar;
 
 use Exception;
-use RollbarNotifier;
-use Monolog\Logger as Monolog;
 use Illuminate\Foundation\Application;
+use Monolog\Logger as Monolog;
+use RollbarNotifier;
 
 class RollbarLogHandler {
 
@@ -38,10 +38,6 @@ class RollbarLogHandler {
         $this->app = $app;
 
         $this->level = $this->parseLevel($level ?: 'debug');
-
-        // Set Laravel information
-        $this->rollbar->environment = $this->app['config']->get('services.rollbar.environment', $this->app->environment());
-        $this->rollbar->root = base_path();
     }
 
     /**
@@ -51,7 +47,7 @@ class RollbarLogHandler {
      * @param string $message
      * @param array  $context
      */
-    public function log($level, $message, array $context = array())
+    public function log($level, $message, array $context = [])
     {
         // Check if we want to log this message.
         if ($this->parseLevel($level) < $this->level)
@@ -76,7 +72,7 @@ class RollbarLogHandler {
      *
      * @param array $context
      */
-    protected function addContext(array $context = array())
+    protected function addContext(array $context = [])
     {
         // Add session data.
         if ($session = $this->app->session->all())
