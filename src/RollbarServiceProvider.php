@@ -39,11 +39,12 @@ class RollbarServiceProvider extends ServiceProvider {
         {
             $defaults = [
                 'environment'  => $app->environment(),
-                'root'         => $app->basePath(),
-                'access_token' => env('ROLLBAR_TOKEN')
+                'root'         => $app->basePath()
             ];
 
             $config = array_merge($defaults, $app['config']->get('services.rollbar'));
+
+            $config['access_token'] = env('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
 
             if (empty($config['access_token']))
             {
