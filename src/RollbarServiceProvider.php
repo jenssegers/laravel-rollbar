@@ -38,8 +38,9 @@ class RollbarServiceProvider extends ServiceProvider {
         $this->app['RollbarNotifier'] = $this->app->share(function ($app)
         {
             $defaults = [
-                'environment' => $app->environment(),
-                'root'        => $app->basePath(),
+                'environment'  => $app->environment(),
+                'root'         => $app->basePath(),
+                'access_token' => env('ROLLBAR_TOKEN')
             ];
 
             $config = array_merge($defaults, $app['config']->get('services.rollbar'));
