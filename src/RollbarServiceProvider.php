@@ -44,7 +44,7 @@ class RollbarServiceProvider extends ServiceProvider {
 
             $config = array_merge($defaults, $app['config']->get('services.rollbar'));
 
-            $config['access_token'] = env('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
+            $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
 
             if (empty($config['access_token']))
             {
@@ -60,7 +60,7 @@ class RollbarServiceProvider extends ServiceProvider {
         {
             $client = $app['RollbarNotifier'];
 
-            $level = env('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
+            $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($client, $app, $level);
         });
