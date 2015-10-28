@@ -39,7 +39,7 @@ class RollbarServiceProvider extends ServiceProvider {
         {
             $defaults = [
                 'environment'  => $app->environment(),
-                'root'         => $app->basePath()
+                'root'         => base_path(),
             ];
 
             $config = array_merge($defaults, $app['config']->get('services.rollbar'));
