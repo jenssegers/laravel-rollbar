@@ -16,12 +16,12 @@ Install using composer:
 
 Add the service provider to the `'providers'` array in `config/app.php`:
 
-    'Jenssegers\Rollbar\RollbarServiceProvider',
+    Jenssegers\Rollbar\RollbarServiceProvider::Class,
 
 Configuration
 -------------
 
-This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Rollbar:
+This package supports configuration through the services configuration file located in `config/services.php`. All configuration variables will be directly passed to Rollbar:
 
     'rollbar' => array(
         'access_token' => 'your-rollbar-token',
