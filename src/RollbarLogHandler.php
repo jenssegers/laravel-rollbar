@@ -59,7 +59,7 @@ class RollbarLogHandler {
 
         if ($message instanceof Exception)
         {
-            $this->rollbar->report_exception($message);
+            $this->rollbar->report_exception($message, null, $context);
         }
         else
         {
