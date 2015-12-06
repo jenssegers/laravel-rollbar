@@ -122,7 +122,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
         $clientMock = Mockery::mock('RollbarNotifier');
         $clientMock->shouldReceive('report_message')->times(2);
-        $clientMock->shouldReceive('report_exception')->times(1)->with($exception);
+        $clientMock->shouldReceive('report_exception')->times(1)->with($exception, null, ['foo' => 'bar']);
 
         $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
         $handlerMock->shouldReceive('log')->passthru();
@@ -130,7 +130,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
 
         $this->app->log->info('hello');
         $this->app->log->error('oops');
-        $this->app->log->error($exception);
+        $this->app->log->error($exception, ['foo' => 'bar']);
     }
 
     public function testErrorLevels1()
