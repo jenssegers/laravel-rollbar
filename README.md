@@ -16,7 +16,7 @@ Install using composer:
 
 Add the service provider to the `'providers'` array in `config/app.php`:
 
-    Jenssegers\Rollbar\RollbarServiceProvider::Class,
+    Jenssegers\Rollbar\RollbarServiceProvider::class,
 
 Configuration
 -------------
