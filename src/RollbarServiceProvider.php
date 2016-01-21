@@ -64,6 +64,16 @@ class RollbarServiceProvider extends ServiceProvider {
 
             return new RollbarLogHandler($client, $app, $level);
         });
+        
+        $this->app->singleton('command.rollbar.deploynotify', function($app)
+        {
+            $config = $app['config']->get('services.rollbar');
+            
+            return new RollbarDeployNotify($config);
+        });
+        
+        $this->commands('command.rollbar.deploynotify');
+
 
         // If the Rollbar client was resolved, then there is a possibility that there
         // are unsent error messages in the internal queue, so let's flush them.
@@ -86,5 +96,11 @@ class RollbarServiceProvider extends ServiceProvider {
             }
         });
     }
-
+    
+    public function provides()
+    {
+        return [
+            'command.rollbar.deploynotify',
+        ];
+    }
 }
