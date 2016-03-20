@@ -1,6 +1,7 @@
 <?php namespace Jenssegers\Rollbar;
 
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
 
@@ -48,6 +49,10 @@ class RollbarServiceProvider extends ServiceProvider
             $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
 
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
+
+            if (empty($config['access_token'])) {
+                throw new InvalidArgumentException('Rollbar access token not configured');
+            }
 
             Rollbar::$instance = $rollbar = new RollbarNotifier($config);
 
