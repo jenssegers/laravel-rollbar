@@ -24,8 +24,8 @@ Configuration
 This package supports configuration through the services configuration file located in `config/services.php`. All configuration variables will be directly passed to Rollbar:
 
     'rollbar' => array(
-        'access_token' => 'your-rollbar-token',
-        'level' => 'debug',
+        'access_token' => env('ROLLBAR_TOKEN'),
+        'level' => env('ROLLBAR_LEVEL'),
     ),
 
 The level variable defines the minimum log level at which log messages are sent to Rollbar. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.
@@ -52,6 +52,8 @@ For Laravel 4 installations, this is located in `app/start/global.php`:
 Your other log messages will also be sent to Rollbar:
 
     \Log::debug('Here is some debug information');
+
+*NOTE*: Fatal exceptions will always be sent to Rollbar.
 
 ### Context informaton
 

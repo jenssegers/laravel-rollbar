@@ -1,20 +1,13 @@
 <?php
 
-class RollbarTest extends Orchestra\Testbench\TestCase {
-
+class RollbarTest extends Orchestra\Testbench\TestCase
+{
     public function setUp()
     {
-        parent::setUp();
-
         $this->access_token = 'B42nHP04s06ov18Dv8X7VI4nVUs6w04X';
-        $this->app->config->set('services.rollbar.access_token', $this->access_token);
-    }
+        putenv('ROLLBAR_TOKEN=' . $this->access_token);
 
-    public function tearDown()
-    {
-        Mockery::close();
-
-        parent::tearDown();
+        parent::setUp();
     }
 
     protected function getPackageProviders($app)
@@ -44,14 +37,6 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->assertInstanceOf('RollbarNotifier', $client);
     }
 
-    public function testNoConfiguration()
-    {
-        $this->setExpectedException('InvalidArgumentException');
-
-        $this->app->config->set('services.rollbar.access_token', null);
-        $client = $this->app->make('RollbarNotifier');
-    }
-
     public function testPassConfiguration()
     {
         $client = $this->app->make('RollbarNotifier');
@@ -75,7 +60,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->app->session->set('foo', 'bar');
 
         $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->once()->with("Test log message", "info", []);
+        $clientMock->shouldReceive('report_message')->once()->with('Test log message', 'info', []);
 
         $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
         $handlerMock->shouldReceive('log')->passthru();
@@ -95,7 +80,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->app->session->set('foo', 'bar');
 
         $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->once()->with("Test log message", "info", [
+        $clientMock->shouldReceive('report_message')->once()->with('Test log message', 'info', [
             'tags' => ['one' => 'two'],
         ]);
 
@@ -186,5 +171,4 @@ class RollbarTest extends Orchestra\Testbench\TestCase {
         $this->app->log->alert('hello');
         $this->app->log->emergency('hello');
     }
-
 }
