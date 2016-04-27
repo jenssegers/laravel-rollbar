@@ -18,6 +18,13 @@ Add the service provider to the `'providers'` array in `config/app.php`:
 
     Jenssegers\Rollbar\RollbarServiceProvider::class,
 
+Service providers and configuration gets cached. If you've added Rollbar and nothing shows up you may need to bust the cache with:
+
+```
+php artisan cache:clear
+php artisan config:cache
+```
+
 Configuration
 -------------
 
