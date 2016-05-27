@@ -57,6 +57,19 @@ public function report(Exception $e)
 }
 ```
 
+To automatically monitor exceptions, **without logging HTTP Exceptions**, you can use this in `app/Exceptions/Handler.php`:
+
+```php
+public function report(Exception $e)
+{
+    if($this->shouldReport($e)){
+        \Log::error($e);
+    }
+    
+    return parent::report($e);
+}
+```
+
 
 For Laravel 4 installations, this is located in `app/start/global.php`:
 
