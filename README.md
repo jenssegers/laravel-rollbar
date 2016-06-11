@@ -57,7 +57,7 @@ public function report(Exception $e)
 }
 ```
 
-To automatically monitor exceptions, **without logging HTTP Exceptions**, you can use this in `app/Exceptions/Handler.php`:
+To automatically monitor exceptions, **without logging exceptions in $dontReport array (which includes HTTP Exceptions by default)**, you can use this in `app/Exceptions/Handler.php`:
 
 ```php
 public function report(Exception $e)
