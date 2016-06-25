@@ -1,9 +1,14 @@
 <?php namespace Jenssegers\Rollbar;
 
+use Illuminate\Foundation\Application as LaravelApplication;
+use Laravel\Lumen\Application as LumenApplication;
+
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
+
+use Monolog\Handler\RollbarHandler;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -20,11 +25,20 @@ class RollbarServiceProvider extends ServiceProvider
     public function boot()
     {
         $app = $this->app;
+        if ($this->app instanceof LaravelApplication) {
+            // Listen to log messages.
+            $app['log']->listen(function ($level, $message, $context) use ($app) {
+                $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
+            });
+        }elseif($this->app instanceof LumenApplication) {
+            // Listen to log messages.
+            $app['log']->pushHandler(
+                app(RollbarLogHandler::class, [
+                    $this->app[Rollbar::class]
+                ])
+            );
+        }
 
-        // Listen to log messages.
-        $app['log']->listen(function ($level, $message, $context) use ($app) {
-            $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
-        });
     }
 
     /**
@@ -32,6 +46,10 @@ class RollbarServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        if($this->app instanceof LumenApplication) {
+            $this->app->configure('services');
+        }
+        
         // Don't register rollbar if it is not configured.
         if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
             return;
@@ -59,11 +77,20 @@ class RollbarServiceProvider extends ServiceProvider
             return $rollbar;
         });
 
-        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $this->app->share(function ($app) {
-            $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
+        if ($this->app instanceof LaravelApplication) {
+            $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $this->app->share(function ($app) {
+                $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
-            return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
-        });
+                return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
+            });
+        }elseif($this->app instanceof LumenApplication) {
+            $app[RollbarLogHandler::class] = $app->share(function ($app) {
+                $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
+
+                $handler = app(RollbarHandler::class, [$this->app[RollbarNotifier::class], $level]);
+                return $handler;
+            });
+        }
 
         // Register the fatal error handler.
         register_shutdown_function(function () use ($app) {
