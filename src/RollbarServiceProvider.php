@@ -31,9 +31,9 @@ class RollbarServiceProvider extends ServiceProvider
         } elseif ($this->app instanceof LumenApplication) {
             // Listen to log messages.
             $app['log']->pushHandler(
-                app(RollbarLogHandler::class, [
+                app(RollbarLogHandler::class, array(
                     $this->app[Rollbar::class]
-                ])
+                ))
             );
         }
 
@@ -57,14 +57,14 @@ class RollbarServiceProvider extends ServiceProvider
 
         $this->app['RollbarNotifier'] = $this->app->share(function ($app) {
             // Default configuration.
-            $defaults = [
+            $defaults = array(
                 'environment' => $app->environment(),
                 'root' => base_path(),
-            ];
+            );
 
-            $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
+            $config = array_merge($defaults, $app['config']->get('services.rollbar', array()));
 
-            $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
+            $config['access_token'] = getenv('ROLLBAR_TOKEN') ? getenv('ROLLBAR_TOKEN') : $app['config']->get('services.rollbar.access_token');
 
             if (empty($config['access_token'])) {
                 throw new InvalidArgumentException('Rollbar access token not configured');
