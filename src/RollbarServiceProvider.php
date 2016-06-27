@@ -6,7 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
-use Monolog\Handler\RollbarHandler;
+
+//use Monolog\Handler\RollbarHandler;
 
 class RollbarServiceProvider extends ServiceProvider
 {
