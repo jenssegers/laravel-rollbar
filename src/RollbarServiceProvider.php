@@ -2,12 +2,10 @@
 
 use Illuminate\Foundation\Application as LaravelApplication;
 use Laravel\Lumen\Application as LumenApplication;
-
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
-
 use Monolog\Handler\RollbarHandler;
 
 class RollbarServiceProvider extends ServiceProvider
@@ -30,7 +28,7 @@ class RollbarServiceProvider extends ServiceProvider
             $app['log']->listen(function ($level, $message, $context) use ($app) {
                 $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
             });
-        }elseif($this->app instanceof LumenApplication) {
+        } elseif ($this->app instanceof LumenApplication) {
             // Listen to log messages.
             $app['log']->pushHandler(
                 app(RollbarLogHandler::class, [
@@ -46,12 +44,12 @@ class RollbarServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if($this->app instanceof LumenApplication) {
+        if ($this->app instanceof LumenApplication) {
             $this->app->configure('services');
         }
-        
+
         // Don't register rollbar if it is not configured.
-        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
+        if (!getenv('ROLLBAR_TOKEN') and !$this->app['config']->get('services.rollbar')) {
             return;
         }
 
@@ -60,8 +58,8 @@ class RollbarServiceProvider extends ServiceProvider
         $this->app['RollbarNotifier'] = $this->app->share(function ($app) {
             // Default configuration.
             $defaults = [
-                'environment'  => $app->environment(),
-                'root'         => base_path(),
+                'environment' => $app->environment(),
+                'root' => base_path(),
             ];
 
             $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
@@ -83,7 +81,7 @@ class RollbarServiceProvider extends ServiceProvider
 
                 return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
             });
-        }elseif($this->app instanceof LumenApplication) {
+        } elseif ($this->app instanceof LumenApplication) {
             $app[RollbarLogHandler::class] = $app->share(function ($app) {
                 $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
