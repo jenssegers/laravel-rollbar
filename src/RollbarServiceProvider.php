@@ -31,8 +31,8 @@ class RollbarServiceProvider extends ServiceProvider
         } elseif ($this->app instanceof LumenApplication) {
             // Listen to log messages.
             $app['log']->pushHandler(
-                app(RollbarLogHandler::class, array(
-                    $this->app[Rollbar::class]
+                app('Jenssegers\Rollbar\RollbarLogHandler', array(
+                    $this->app['Rollbar']
                 ))
             );
         }
@@ -82,10 +82,10 @@ class RollbarServiceProvider extends ServiceProvider
                 return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
             });
         } elseif ($this->app instanceof LumenApplication) {
-            $app[RollbarLogHandler::class] = $app->share(function ($app) {
+            $app['Jenssegers\Rollbar\RollbarLogHandler'] = $app->share(function ($app) {
                 $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
-                $handler = app(RollbarHandler::class, [$this->app[RollbarNotifier::class], $level]);
+                $handler = app('Monolog\Handler\RollbarHandler', [$this->app['RollbarNotifier'], $level]);
                 return $handler;
             });
         }
