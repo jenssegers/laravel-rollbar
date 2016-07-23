@@ -4,6 +4,7 @@ use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
+use Auth;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,18 @@ class RollbarServiceProvider extends ServiceProvider
 
         // Listen to log messages.
         $app['log']->listen(function ($level, $message, $context) use ($app) {
+            
+            $user = Auth::user();
+
+            // log logged in user details
+            if ($user instanceof User) {
+                $context['person'] = [
+                    'id'        => $user->id,
+                    'username'  => $user->name,
+                    'email'     => $user->email
+                ];
+            }
+            
             $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
         });
     }
