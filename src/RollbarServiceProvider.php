@@ -5,6 +5,7 @@ use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
 use Auth;
+use App\User;
 
 class RollbarServiceProvider extends ServiceProvider
 {
