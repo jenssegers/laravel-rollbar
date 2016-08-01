@@ -16,17 +16,31 @@ Install using composer:
 composer require jenssegers/rollbar
 ```
 
+### Laravel 5.x
+
 Add the service provider to the `'providers'` array in `config/app.php`:
 
 ```php
 Jenssegers\Rollbar\RollbarServiceProvider::class,
 ```
-    
-If you only want to enable Rollbar reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
 
 ```php
 if ($this->app->environment('production')) {
     $this->app->register(\Jenssegers\Rollbar\RollbarServiceProvider::class);
+}
+```
+
+### Lumen 5.x
+
+Register the service provider in `bootstrap/app.php`:
+
+```php
+$app->register(Jenssegers\Rollbar\RollbarLumenServiceProvider::class);
+```
+
+```php
+if ($app->environment('production')) {
+    $app->register(\Jenssegers\Rollbar\RollbarServiceProvider::class);
 }
 ```
 
@@ -46,6 +60,8 @@ The level variable defines the minimum log level at which log messages are sent 
 
 Usage
 -----
+
+Lumen Service Provider automatically monitors exceptions, so the following setup is only for Laravel.
 
 To automatically monitor exceptions, simply use the `Log` facade in your error handler in `app/Exceptions/Handler.php`:
 
