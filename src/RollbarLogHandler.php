@@ -1,11 +1,11 @@
 <?php namespace Jenssegers\Rollbar;
 
 use Exception;
-use Illuminate\Foundation\Application;
+use RollbarNotifier;
+use Psr\Log\AbstractLogger;
 use InvalidArgumentException;
 use Monolog\Logger as Monolog;
-use Psr\Log\AbstractLogger;
-use RollbarNotifier;
+use Illuminate\Foundation\Application;
 
 class RollbarLogHandler extends AbstractLogger
 {

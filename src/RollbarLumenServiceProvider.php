@@ -1,11 +1,9 @@
 <?php namespace Jenssegers\Rollbar;
 
-use Illuminate\Support\ServiceProvider;
-use InvalidArgumentException;
-use Jenssegers\Rollbar\RollbarLogHandler;
-use Monolog\Handler\RollbarHandler;
 use Rollbar;
 use RollbarNotifier;
+use Monolog\Handler\RollbarHandler;
+use Jenssegers\Rollbar\RollbarLogHandler;
 
 class RollbarLumenServiceProvider extends RollbarServiceProvider
 {
