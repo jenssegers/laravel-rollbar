@@ -42,7 +42,7 @@ class RollbarServiceProvider extends ServiceProvider
 
     protected function registerRollbarNotifier()
     {
-        $app[RollbarNotifier::class] = $this->app->share(function ($app) {
+        $this->app[RollbarNotifier::class] = $this->app->share(function ($app) {
             // Default configuration.
             $defaults = [
                 'environment'  => $app->environment(),
@@ -54,7 +54,7 @@ class RollbarServiceProvider extends ServiceProvider
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
 
             if (empty($config['access_token'])) {
-                throw new InvalidArgumentException('Rollbar access token not configured');
+                throw new InvalidArgumentException('Rollbar access token not configured.');
             }
 
             Rollbar::$instance = $rollbar = new RollbarNotifier($config);
@@ -75,7 +75,7 @@ class RollbarServiceProvider extends ServiceProvider
     protected function registerErrorHandlers()
     {
         // Register the fatal error handler.
-        register_shutdown_function(function () use ($app) {
+        register_shutdown_function(function () {
             if (isset($this->app[RollbarNotifier::class])) {
                 $this->app->make(RollbarNotifier::class);
                 Rollbar::report_fatal_error();
@@ -84,7 +84,7 @@ class RollbarServiceProvider extends ServiceProvider
 
         // If the Rollbar client was resolved, then there is a possibility that there
         // are unsent error messages in the internal queue, so let's flush them.
-        register_shutdown_function(function () use ($app) {
+        register_shutdown_function(function () {
             if (isset($this->app[RollbarNotifier::class])) {
                 $this->app[RollbarNotifier::class]->flush();
             }
