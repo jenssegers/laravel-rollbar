@@ -47,6 +47,7 @@ class RollbarLumenServiceProvider extends RollbarServiceProvider
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             $handler = app(RollbarHandler::class, [$this->app[RollbarNotifier::class], $level]);
+            $handler->getFormatter()->includeStacktraces();
 
             return $handler;
         });
