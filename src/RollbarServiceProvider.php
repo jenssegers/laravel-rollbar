@@ -94,6 +94,15 @@ class RollbarServiceProvider extends ServiceProvider
     protected function registerLogListener()
     {
         $this->app['log']->listen(function ($level, $message, $context) use ($app) {
+
+            if ($user = \Auth::user()) {
+                $context['person'] = [
+                    'id'       => $user->id,
+                    'username' => $user->username,
+                    'email'    => $user->email
+                ];
+            }
+
             $app[RollbarLogHandler::class]->log($level, $message, $context);
         });
     }
