@@ -75,7 +75,7 @@ class RollbarLogHandler extends AbstractLogger
 
         $context = $this->addContext($context);
 
-        if ($message instanceof Exception) {
+        if ($message instanceof Exception || $message instanceof Throwable) {
             $this->rollbar->report_exception($message, null, $context);
         } else {
             $this->rollbar->report_message($message, $level, $context);

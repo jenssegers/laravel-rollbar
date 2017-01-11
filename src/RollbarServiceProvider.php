@@ -4,6 +4,7 @@ use Rollbar;
 use RollbarNotifier;
 use InvalidArgumentException;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Auth\Guard;
 use Jenssegers\Rollbar\RollbarLogHandler;
 
 class RollbarServiceProvider extends ServiceProvider
@@ -21,7 +22,7 @@ class RollbarServiceProvider extends ServiceProvider
     public function register()
     {
         // Don't register rollbar if it is not configured.
-        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
+        if (! getenv('ROLLBAR_TOKEN') && ! $this->app['config']->get('services.rollbar')) {
             return;
         }
 
@@ -53,12 +54,32 @@ class RollbarServiceProvider extends ServiceProvider
 
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
 
+            if (is_callable($app['auth']->userResolver())) {
+                $config['person_fn'] = function () use ($app, $config) {
+                    $user = @call_user_func($app['auth']->userResolver());
+
+                    $person = [
+                        'id' => $user->id
+                    ];
+
+                    if (array_key_exists('person_attributes', $config)) {
+                        foreach ($config['person_attributes'] as $name => $value) {
+                            $person[(is_string($name) && is_string($value)) ? $name : $value] =
+                                array_reduce(explode('.', $value), function ($o, $p) {
+                                    return $o->$p;
+                                }, $user);
+                        }
+                    }
+
+                    return $person;
+                };
+            }
+
             if (empty($config['access_token'])) {
                 throw new InvalidArgumentException('Rollbar access token not configured.');
             }
 
             Rollbar::$instance = $rollbar = new RollbarNotifier($config);
-
             return $rollbar;
         });
     }
@@ -77,15 +98,10 @@ class RollbarServiceProvider extends ServiceProvider
         // Register the fatal error handler.
         register_shutdown_function(function () {
             if (isset($this->app[RollbarNotifier::class])) {
-                $this->app->make(RollbarNotifier::class);
-                Rollbar::report_fatal_error();
-            }
-        });
+                $rollbar = $this->app->make(RollbarNotifier::class);
 
-        // If the Rollbar client was resolved, then there is a possibility that there
-        // are unsent error messages in the internal queue, so let's flush them.
-        register_shutdown_function(function () {
-            if (isset($this->app[RollbarNotifier::class])) {
+                // Rollbar::report_fatal_error();
+
                 $this->app[RollbarNotifier::class]->flush();
             }
         });
