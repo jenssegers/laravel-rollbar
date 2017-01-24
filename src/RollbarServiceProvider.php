@@ -22,7 +22,20 @@ class RollbarServiceProvider extends ServiceProvider
         $app = $this->app;
 
         // Listen to log messages.
-        $app['log']->listen(function ($level, $message, $context) use ($app) {
+        $app['log']->listen(function () use ($app) {
+            $args = func_get_args();
+
+            // Laravel 5.4 returns a MessageLogged instance only
+            if (count($args) == 1) {
+                $level = $args[0]->level;
+                $message = $args[0]->message;
+                $context = $args[0]->context;
+            } else {
+                $level = $args[0];
+                $message = $args[1];
+                $context = $args[2];
+            }
+
             $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
         });
     }
