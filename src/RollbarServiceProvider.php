@@ -39,7 +39,7 @@ class RollbarServiceProvider extends ServiceProvider
 
         $app = $this->app;
 
-        $this->app['RollbarNotifier'] = $this->app->singleton(function ($app) {
+        $this->app->singleton('RollbarNotifier', function ($app) {
             // Default configuration.
             $defaults = [
                 'environment'  => $app->environment(),
@@ -59,7 +59,7 @@ class RollbarServiceProvider extends ServiceProvider
             return $rollbar;
         });
 
-        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $this->app->singleton(function ($app) {
+        $this->app->singleton('Jenssegers\Rollbar\RollbarLogHandler', function ($app) {
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
