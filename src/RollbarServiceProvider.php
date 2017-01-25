@@ -22,7 +22,20 @@ class RollbarServiceProvider extends ServiceProvider
         $app = $this->app;
 
         // Listen to log messages.
-        $app['log']->listen(function ($level, $message, $context) use ($app) {
+        $app['log']->listen(function () use ($app) {
+            $args = func_get_args();
+
+            // Laravel 5.4 returns a MessageLogged instance only
+            if (count($args) == 1) {
+                $level = $args[0]->level;
+                $message = $args[0]->message;
+                $context = $args[0]->context;
+            } else {
+                $level = $args[0];
+                $message = $args[1];
+                $context = $args[2];
+            }
+
             $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
         });
     }
@@ -39,7 +52,7 @@ class RollbarServiceProvider extends ServiceProvider
 
         $app = $this->app;
 
-        $this->app['RollbarNotifier'] = $this->app->share(function ($app) {
+        $this->app->singleton('RollbarNotifier', function ($app) {
             // Default configuration.
             $defaults = [
                 'environment'  => $app->environment(),
@@ -59,7 +72,7 @@ class RollbarServiceProvider extends ServiceProvider
             return $rollbar;
         });
 
-        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $this->app->share(function ($app) {
+        $this->app->singleton('Jenssegers\Rollbar\RollbarLogHandler', function ($app) {
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
