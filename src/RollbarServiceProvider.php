@@ -62,8 +62,9 @@ class RollbarServiceProvider extends ServiceProvider
             $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
 
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
+            $isAgentHandlerConfigured = isset($config['handler']) && $config['handler'] == 'agent';
 
-            if (empty($config['access_token'])) {
+            if (!$isAgentHandlerConfigured && empty($config['access_token'])) {
                 throw new InvalidArgumentException('Rollbar access token not configured');
             }
 
