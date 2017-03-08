@@ -57,7 +57,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase
 
     public function testAutomaticContext()
     {
-        $this->app->session->set('foo', 'bar');
+        $this->app->session->put('foo', 'bar');
 
         $clientMock = Mockery::mock('RollbarNotifier');
         $clientMock->shouldReceive('report_message')->once()->with('Test log message', 'info', []);
@@ -77,7 +77,7 @@ class RollbarTest extends Orchestra\Testbench\TestCase
 
     public function testMergedContext()
     {
-        $this->app->session->set('foo', 'bar');
+        $this->app->session->put('foo', 'bar');
 
         $clientMock = Mockery::mock('RollbarNotifier');
         $clientMock->shouldReceive('report_message')->once()->with('Test log message', 'info', [
