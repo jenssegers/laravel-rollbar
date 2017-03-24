@@ -25,7 +25,7 @@ Jenssegers\Rollbar\RollbarServiceProvider::class,
 If you only want to enable Rollbar reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
 
 ```php
-    public function boot()
+    public function register()
     {
         if ($this->app->environment('production')) {
             $this->app->register(\Jenssegers\Rollbar\RollbarServiceProvider::class);
