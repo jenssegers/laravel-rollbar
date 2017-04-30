@@ -13,20 +13,20 @@ Installation
 Install using composer:
 
 ```
-composer require jenssegers/rollbar
+composer require rollbar/rollbar-laravel
 ```
 
 Add the service provider to the `'providers'` array in `config/app.php`:
 
 ```php
-Jenssegers\Rollbar\RollbarServiceProvider::class,
+Rollbar\Laravel\RollbarServiceProvider::class,
 ```
     
 If you only want to enable Rollbar reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
 
 ```php
 if ($this->app->environment('production')) {
-    $this->app->register(\Jenssegers\Rollbar\RollbarServiceProvider::class);
+    $this->app->register(\Rollbar\Laravel\RollbarServiceProvider::class);
 }
 ```
 

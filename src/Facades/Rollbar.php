@@ -1,4 +1,4 @@
-<?php namespace Jenssegers\Rollbar\Facades;
+<?php namespace Rollbar\Laravel\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -7,10 +7,10 @@ class Rollbar extends Facade
     /**
      * Get a schema builder instance for the default connection.
      *
-     * @return \Jenssegers\Rollbar\RollbarLogHandler
+     * @return \Rollbar\Laravel\RollbarLogHandler
      */
     protected static function getFacadeAccessor()
     {
-        return 'Jenssegers\Rollbar\RollbarLogHandler';
+        return 'Rollbar\Laravel\RollbarLogHandler';
     }
 }

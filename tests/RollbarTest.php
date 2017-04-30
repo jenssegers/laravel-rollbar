@@ -1,6 +1,8 @@
-<?php
+<?php namespace Rollbar\Laravel;
 
-class RollbarTest extends Orchestra\Testbench\TestCase
+use Rollbar\Laravel\Facades\Rollbar as RollbarFacade;
+
+class RollbarTest extends \Orchestra\Testbench\TestCase
 {
     public function setUp()
     {
@@ -12,35 +14,36 @@ class RollbarTest extends Orchestra\Testbench\TestCase
 
     protected function getPackageProviders($app)
     {
-        return ['Jenssegers\Rollbar\RollbarServiceProvider'];
+        return ['Rollbar\Laravel\RollbarServiceProvider'];
     }
 
     public function testBinding()
     {
-        $client = $this->app->make('RollbarNotifier');
-        $this->assertInstanceOf('RollbarNotifier', $client);
+        $client = $this->app->make('Rollbar\RollbarLogger');
+        $this->assertInstanceOf('Rollbar\RollbarLogger', $client);
 
-        $handler = $this->app->make('Jenssegers\Rollbar\RollbarLogHandler');
-        $this->assertInstanceOf('Jenssegers\Rollbar\RollbarLogHandler', $handler);
+        $handler = $this->app->make('Rollbar\Laravel\RollbarLogHandler');
+        $this->assertInstanceOf('Rollbar\Laravel\RollbarLogHandler', $handler);
     }
 
     public function testIsSingleton()
     {
-        $handler1 = $this->app->make('Jenssegers\Rollbar\RollbarLogHandler');
-        $handler2 = $this->app->make('Jenssegers\Rollbar\RollbarLogHandler');
+        $handler1 = $this->app->make('Rollbar\Laravel\RollbarLogHandler');
+        $handler2 = $this->app->make('Rollbar\Laravel\RollbarLogHandler');
         $this->assertEquals(spl_object_hash($handler1), spl_object_hash($handler2));
     }
 
     public function testFacade()
     {
-        $client = Rollbar::$instance;
-        $this->assertInstanceOf('RollbarNotifier', $client);
+        $client = RollbarFacade::getFacadeRoot();
+        $this->assertInstanceOf('Rollbar\Laravel\RollbarLogHandler', $client);
     }
 
     public function testPassConfiguration()
     {
-        $client = $this->app->make('RollbarNotifier');
-        $this->assertEquals($this->access_token, $client->access_token);
+        $client = $this->app->make('Rollbar\RollbarLogger');
+        $config = $client->extend([]);
+        $this->assertEquals($this->access_token, $config['access_token']);
     }
 
     public function testCustomConfiguration()
@@ -49,69 +52,72 @@ class RollbarTest extends Orchestra\Testbench\TestCase
         $this->app->config->set('services.rollbar.included_errno', E_ERROR);
         $this->app->config->set('services.rollbar.environment', 'staging');
 
-        $client = $this->app->make('RollbarNotifier');
-        $this->assertEquals('staging', $client->environment);
-        $this->assertEquals('/tmp', $client->root);
-        $this->assertEquals(E_ERROR, $client->included_errno);
+        $client = $this->app->make('Rollbar\RollbarLogger');
+        $config = $client->extend([]);
+        
+        $this->assertEquals('staging', $config['environment']);
+        $this->assertEquals('/tmp', $config['root']);
+        $this->assertEquals(E_ERROR, $config['included_errno']);
     }
 
     public function testAutomaticContext()
     {
         $this->app->session->put('foo', 'bar');
-
-        $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->once()->with('Test log message', 'info', []);
-
-        $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
+        
+        $logger = $this->app->make('Rollbar\RollbarLogger');
+        
+        $handlerMock = \Mockery::mock('Rollbar\Laravel\RollbarLogHandler', [$logger, $this->app]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $handlerMock;
-
-        $handler = $this->app->make('Jenssegers\Rollbar\RollbarLogHandler');
-        $handler->log('info', 'Test log message');
+        $this->app['Rollbar\Laravel\RollbarLogHandler'] = $handlerMock;
+        
+        $handlerMock->log('info', 'Test log message');
+        
+        $config = $logger->extend([]);
 
         $this->assertEquals([
             'session' => ['foo' => 'bar'],
             'id'      => $this->app->session->getId(),
-        ], $clientMock->person);
+        ], $config['person']);
     }
 
     public function testMergedContext()
     {
         $this->app->session->put('foo', 'bar');
-
-        $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->once()->with('Test log message', 'info', [
-            'tags' => ['one' => 'two'],
-        ]);
-
-        $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
+        
+        $logger = $this->app->make('Rollbar\RollbarLogger');
+        
+        $handlerMock = \Mockery::mock('Rollbar\Laravel\RollbarLogHandler', [$logger, $this->app]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $handlerMock;
-
-        $handler = $this->app->make('Jenssegers\Rollbar\RollbarLogHandler');
-        $handler->log('info', 'Test log message', [
+        $this->app['Rollbar\Laravel\RollbarLogHandler'] = $handlerMock;
+        
+        $handlerMock->log('info', 'Test log message', [
             'tags'   => ['one' => 'two'],
-            'person' => ['id'  => 1337, 'email' => 'john@doe.com'],
+            'person' => ['id'  => "1337", 'email' => 'john@doe.com'],
         ]);
+        
+        $config = $logger->extend([]);
 
         $this->assertEquals([
             'session' => ['foo' => 'bar'],
-            'id'      => 1337,
+            'id'      => "1337",
             'email'   => 'john@doe.com',
-        ], $clientMock->person);
+        ], $config['person']);
     }
 
     public function testLogListener()
     {
-        $exception = new Exception('Testing error handler');
+        $exception = new \Exception('Testing error handler');
 
-        $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->times(2);
-        $clientMock->shouldReceive('report_exception')->times(1)->with($exception, null, ['foo' => 'bar']);
+        $clientMock = \Mockery::mock('Rollbar\RollbarLogger');
+        
+        $clientMock->shouldReceive('log')->times(2);
+        $clientMock->shouldReceive('log')->times(1)->with('error', $exception, ['foo' => 'bar']);
 
-        $handlerMock = Mockery::mock('Jenssegers\Rollbar\RollbarLogHandler', [$clientMock, $this->app]);
+        $handlerMock = \Mockery::mock('Rollbar\Laravel\RollbarLogHandler', [$clientMock, $this->app]);
+        
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Rollbar\RollbarLogHandler'] = $handlerMock;
+        
+        $this->app['Rollbar\Laravel\RollbarLogHandler'] = $handlerMock;
 
         $this->app->log->info('hello');
         $this->app->log->error('oops');
@@ -122,9 +128,9 @@ class RollbarTest extends Orchestra\Testbench\TestCase
     {
         $this->app->config->set('services.rollbar.level', 'critical');
 
-        $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->times(3);
-        $this->app['RollbarNotifier'] = $clientMock;
+        $clientMock = \Mockery::mock('Rollbar\RollbarLogger');
+        $clientMock->shouldReceive('log')->times(3);
+        $this->app['Rollbar\RollbarLogger'] = $clientMock;
 
         $this->app->log->debug('hello');
         $this->app->log->info('hello');
@@ -140,9 +146,9 @@ class RollbarTest extends Orchestra\Testbench\TestCase
     {
         $this->app->config->set('services.rollbar.level', 'debug');
 
-        $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->times(8);
-        $this->app['RollbarNotifier'] = $clientMock;
+        $clientMock = \Mockery::mock('Rollbar\RollbarLogger');
+        $clientMock->shouldReceive('log')->times(8);
+        $this->app['Rollbar\RollbarLogger'] = $clientMock;
 
         $this->app->log->debug('hello');
         $this->app->log->info('hello');
@@ -158,9 +164,9 @@ class RollbarTest extends Orchestra\Testbench\TestCase
     {
         $this->app->config->set('services.rollbar.level', 'none');
 
-        $clientMock = Mockery::mock('RollbarNotifier');
-        $clientMock->shouldReceive('report_message')->times(0);
-        $this->app['RollbarNotifier'] = $clientMock;
+        $clientMock = \Mockery::mock('Rollbar\RollbarLogger');
+        $clientMock->shouldReceive('log')->times(0);
+        $this->app['Rollbar\RollbarLogger'] = $clientMock;
 
         $this->app->log->debug('hello');
         $this->app->log->info('hello');
