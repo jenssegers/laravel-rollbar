@@ -75,8 +75,6 @@ class RollbarServiceProvider extends ServiceProvider
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($app['Rollbar\RollbarLogger'], $app, $level);
-            
         });
-        
     }
 }
