@@ -16,6 +16,12 @@ Install using composer:
 composer require rollbar/rollbar-laravel
 ```
 
+Add Project Access Token `post_server_item` from Rollbar.com -> Settings -> Project Access Tokens to .env:
+
+```
+ROLLBAR_TOKEN=[your Rollbar project access token]
+```
+
 Add the service provider to the `'providers'` array in `config/app.php`:
 
 ```php
@@ -32,6 +38,8 @@ if ($this->app->environment('production')) {
 
 Configuration
 -------------
+
+Setting up `ROLLBAR_TOKEN` in .env should be enough for basic configuration.
 
 This package supports configuration through the services configuration file located in `config/services.php`. All configuration variables will be directly passed to Rollbar:
 
