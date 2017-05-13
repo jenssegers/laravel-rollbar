@@ -5,14 +5,15 @@ use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Monolog\Logger as Monolog;
 use Psr\Log\AbstractLogger;
-use RollbarNotifier;
+use Rollbar\Payload\Level;
+use Rollbar\RollbarLogger;
 
 class RollbarLogHandler extends AbstractLogger
 {
     /**
      * The rollbar client instance.
      *
-     * @var RollbarNotifier
+     * @var RollbarLogger
      */
     protected $rollbar;
 
@@ -50,7 +51,7 @@ class RollbarLogHandler extends AbstractLogger
     /**
      * Constructor.
      */
-    public function __construct(RollbarNotifier $rollbar, Application $app, $level = 'debug')
+    public function __construct(RollbarLogger $rollbar, Application $app, $level = 'debug')
     {
         $this->rollbar = $rollbar;
 
@@ -62,9 +63,10 @@ class RollbarLogHandler extends AbstractLogger
     /**
      * Log a message to Rollbar.
      *
-     * @param mixed  $level
+     * @param mixed $level
      * @param string $message
-     * @param array  $context
+     * @param array $context
+     * @return \Rollbar\Response
      */
     public function log($level, $message, array $context = [])
     {
@@ -76,9 +78,9 @@ class RollbarLogHandler extends AbstractLogger
         $context = $this->addContext($context);
 
         if ($message instanceof Exception) {
-            $this->rollbar->report_exception($message, null, $context);
+            return $this->rollbar->log(Level::error(), $message, $context);
         } else {
-            $this->rollbar->report_message($message, $level, $context);
+            return $this->rollbar->log($level, $message, $context);
         }
     }
 
@@ -86,39 +88,32 @@ class RollbarLogHandler extends AbstractLogger
      * Add Laravel specific information to the context.
      *
      * @param array $context
+     * @return array
      */
     protected function addContext(array $context = [])
     {
         // Add session data.
         if ($session = $this->app->session->all()) {
-            if (empty($this->rollbar->person) or ! is_array($this->rollbar->person)) {
-                $this->rollbar->person = [];
-            }
-
             // Merge person context.
             if (isset($context['person']) and is_array($context['person'])) {
-                $this->rollbar->person = $context['person'];
+                $this->rollbar->configure(['person' => $context['person']]);
                 unset($context['person']);
-            } else {
-                if ($this->rollbar->person_fn && is_callable($this->rollbar->person_fn)) {
-                    $data = @call_user_func($this->rollbar->person_fn);
-                    if (isset($data['id'])) {
-                        $this->rollbar->person = call_user_func($this->rollbar->person_fn);
-                    }
-                }
             }
 
             // Add user session information.
-            if (isset($this->rollbar->person['session'])) {
-                $this->rollbar->person['session'] = array_merge($session, $this->rollbar->person['session']);
-            } else {
-                $this->rollbar->person['session'] = $session;
-            }
+            $config = $this->rollbar->extend([]);
+            $person = isset($config['person']) ? $config['person'] : [];
+
+            $person['session'] = isset($person['session'])
+                ? array_merge($session, $person['session'])
+                : $person['session'] = $session;
 
             // User session id as user id if not set.
-            if (! isset($this->rollbar->person['id'])) {
-                $this->rollbar->person['id'] = $this->app->session->getId();
+            if (! isset($person['id'])) {
+                $person['id'] = $this->app->session->getId();
             }
+
+            $this->rollbar->configure(['person' => $person]);
         }
 
         return $context;
@@ -127,7 +122,7 @@ class RollbarLogHandler extends AbstractLogger
     /**
      * Parse the string level into a Monolog constant.
      *
-     * @param  string  $level
+     * @param  string $level
      * @return int
      *
      * @throws \InvalidArgumentException
