@@ -2,8 +2,7 @@
 
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
-use Rollbar;
-use RollbarNotifier;
+use Rollbar\Rollbar;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -36,7 +35,7 @@ class RollbarServiceProvider extends ServiceProvider
                 $context = $args[2];
             }
 
-            $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
+            $app[RollbarLogHandler::class]->log($level, $message, $context);
         });
     }
 
@@ -50,48 +49,26 @@ class RollbarServiceProvider extends ServiceProvider
             return;
         }
 
-        $app = $this->app;
+        // Default configuration.
+        $defaults = [
+            'environment'  => $this->app->environment(),
+            'root'         => base_path(),
+        ];
 
-        $this->app->singleton('RollbarNotifier', function ($app) {
-            // Default configuration.
-            $defaults = [
-                'environment'  => $app->environment(),
-                'root'         => base_path(),
-            ];
+        $config = array_merge($defaults, $this->app['config']->get('services.rollbar', []));
 
-            $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
+        $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $this->app['config']->get('services.rollbar.access_token');
 
-            $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
+        if (empty($config['access_token'])) {
+            throw new InvalidArgumentException('Rollbar access token not configured');
+        }
 
-            if (empty($config['access_token'])) {
-                throw new InvalidArgumentException('Rollbar access token not configured');
-            }
+        Rollbar::init($config);
 
-            Rollbar::$instance = $rollbar = new RollbarNotifier($config);
-
-            return $rollbar;
-        });
-
-        $this->app->singleton('Jenssegers\Rollbar\RollbarLogHandler', function ($app) {
+        $this->app->singleton(RollbarLogHandler::class, function ($app) {
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
-            return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
-        });
-
-        // Register the fatal error handler.
-        register_shutdown_function(function () use ($app) {
-            if (isset($app['RollbarNotifier'])) {
-                $app->make('RollbarNotifier');
-                Rollbar::report_fatal_error();
-            }
-        });
-
-        // If the Rollbar client was resolved, then there is a possibility that there
-        // are unsent error messages in the internal queue, so let's flush them.
-        register_shutdown_function(function () use ($app) {
-            if (isset($app['RollbarNotifier'])) {
-                $app['RollbarNotifier']->flush();
-            }
+            return new RollbarLogHandler($app, $level);
         });
     }
 }
