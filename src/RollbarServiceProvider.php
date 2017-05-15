@@ -61,7 +61,7 @@ class RollbarServiceProvider extends ServiceProvider
 
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
 
-            if (is_callable($app['auth']->userResolver())) {
+            if (is_callable([$app['auth'], 'userResolver'])) {
                 $config['person_fn'] = function () use ($app, $config) {
                     $user = @call_user_func($app['auth']->userResolver());
 
