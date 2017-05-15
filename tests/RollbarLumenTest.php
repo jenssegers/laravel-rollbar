@@ -1,6 +1,6 @@
 <?php
 
-class RollbarLumenTest extends Orchestra\Testbench\TestCase
+abstract class RollbarLumenTest extends Orchestra\Testbench\TestCase
 {
     /**
      *
