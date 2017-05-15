@@ -50,7 +50,7 @@ class RollbarServiceProvider extends ServiceProvider
 
     protected function registerRollbarNotifier()
     {
-        $this->app->singleton(RollbarNotifier::class, function ($app) {
+        $this->app->singleton('RollbarNotifier', function ($app) {
             // Default configuration.
             $defaults = [
                 'environment'  => $app->environment(),
@@ -93,10 +93,10 @@ class RollbarServiceProvider extends ServiceProvider
 
     protected function registerRollbarLogHandler()
     {
-        $this->app->singleton(RollbarLogHandler::class, function ($app) {
+        $this->app->singleton('Jenssegers\Rollbar\RollbarLogHandler', function ($app) {
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
-            return new RollbarLogHandler($app[RollbarNotifier::class], $app, $level);
+            return new RollbarLogHandler($app['RollbarNotifier'], $app, $level);
         });
     }
 
@@ -104,12 +104,12 @@ class RollbarServiceProvider extends ServiceProvider
     {
         // Register the fatal error handler.
         register_shutdown_function(function () {
-            if (isset($this->app[RollbarNotifier::class])) {
-                $rollbar = $this->app->make(RollbarNotifier::class);
+            if (isset($this->app['RollbarNotifier'])) {
+                $rollbar = $this->app->make('RollbarNotifier');
 
                 // Rollbar::report_fatal_error();
 
-                $this->app[RollbarNotifier::class]->flush();
+                $this->app['RollbarNotifier']->flush();
             }
         });
     }
@@ -130,20 +130,7 @@ class RollbarServiceProvider extends ServiceProvider
                 $context = $args[2];
             }
 
-            $this->app[RollbarLogHandler::class]->log($level, $message, $context);
+            $this->app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
         });
-
-        /* $this->app['log']->listen(function ($level, $message, $context) use ($app) {
-
-            if ($user = \Auth::user()) {
-                $context['person'] = [
-                    'id'       => $user->id,
-                    'username' => $user->username,
-                    'email'    => $user->email
-                ];
-            }
-
-            $app[RollbarLogHandler::class]->log($level, $message, $context);
-        }); */
     }
 }
