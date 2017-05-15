@@ -1,4 +1,6 @@
-<?php namespace Jenssegers\Rollbar\Facades;
+<?php
+
+namespace Jenssegers\Rollbar\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

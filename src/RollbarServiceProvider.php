@@ -1,10 +1,12 @@
-<?php namespace Jenssegers\Rollbar;
+<?php
 
+namespace Jenssegers\Rollbar;
+
+use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
-use InvalidArgumentException;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Support\ServiceProvider;
 use Jenssegers\Rollbar\RollbarLogHandler;
 
 class RollbarServiceProvider extends ServiceProvider
@@ -21,6 +23,19 @@ class RollbarServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->registerLibrary();
+    }
+
+    /**
+     * Bootstrap the application events.
+     */
+    public function boot()
+    {
+        $this->registerLogListener();
+    }
+
+    protected function registerLibrary()
+    {
         // Don't register rollbar if it is not configured.
         if (! getenv('ROLLBAR_TOKEN') && ! $this->app['config']->get('services.rollbar')) {
             return;
@@ -33,17 +48,9 @@ class RollbarServiceProvider extends ServiceProvider
         $this->registerErrorHandlers();
     }
 
-    /**
-     * Bootstrap the application events.
-     */
-    public function boot()
-    {
-        $this->registerLogListener();
-    }
-
     protected function registerRollbarNotifier()
     {
-        $this->app[RollbarNotifier::class] = $this->app->share(function ($app) {
+        $this->app->singleton(RollbarNotifier::class, function ($app) {
             // Default configuration.
             $defaults = [
                 'environment'  => $app->environment(),
@@ -86,7 +93,7 @@ class RollbarServiceProvider extends ServiceProvider
 
     protected function registerRollbarLogHandler()
     {
-        $this->app[RollbarLogHandler::class] = $this->app->share(function ($app) {
+        $this->app->singleton(RollbarLogHandler::class, function ($app) {
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($app[RollbarNotifier::class], $app, $level);
@@ -109,7 +116,24 @@ class RollbarServiceProvider extends ServiceProvider
 
     protected function registerLogListener()
     {
-        $this->app['log']->listen(function ($level, $message, $context) use ($app) {
+        $this->app['log']->listen(function () {
+            $args = func_get_args();
+
+            // Laravel 5.4 returns a MessageLogged instance only.
+            if (count($args) == 1) {
+                $level   = $args[0]->level;
+                $message = $args[0]->message;
+                $context = $args[0]->context;
+            } else {
+                $level   = $args[0];
+                $message = $args[1];
+                $context = $args[2];
+            }
+
+            $this->app[RollbarLogHandler::class]->log($level, $message, $context);
+        });
+
+        /* $this->app['log']->listen(function ($level, $message, $context) use ($app) {
 
             if ($user = \Auth::user()) {
                 $context['person'] = [
@@ -120,6 +144,6 @@ class RollbarServiceProvider extends ServiceProvider
             }
 
             $app[RollbarLogHandler::class]->log($level, $message, $context);
-        });
+        }); */
     }
 }

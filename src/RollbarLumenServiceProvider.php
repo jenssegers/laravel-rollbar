@@ -1,4 +1,6 @@
-<?php namespace Jenssegers\Rollbar;
+<?php
+
+namespace Jenssegers\Rollbar;
 
 use Rollbar;
 use RollbarNotifier;
@@ -21,24 +23,7 @@ class RollbarLumenServiceProvider extends RollbarServiceProvider
     {
         $this->app->configure('services');
 
-        // Don't register rollbar if it is not configured.
-        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
-            return;
-        }
-
-        $this->registerRollbarNotifier();
-
-        $this->registerRollbarLogHandler();
-
-        $this->registerErrorHandlers();
-    }
-
-    /**
-     * Bootstrap the application events.
-     */
-    public function boot()
-    {
-        $this->registerLogListener();
+        $this->registerLibrary();
     }
 
     protected function registerRollbarLogHandler()

@@ -1,9 +1,11 @@
-<?php namespace Jenssegers\Rollbar;
+<?php
+
+namespace Jenssegers\Rollbar;
 
 use Exception;
+use InvalidArgumentException;
 use RollbarNotifier;
 use Psr\Log\AbstractLogger;
-use InvalidArgumentException;
 use Monolog\Logger as Monolog;
 use Illuminate\Foundation\Application;
 
