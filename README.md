@@ -10,17 +10,6 @@ Rollbar error monitoring integration for Laravel projects. This library adds a l
 Installation
 ------------
 
-This package has not been submitted to Packagist yet. Until then you need to add the Github repository to your composer.json explicitly:
-```json
-    "repositories": [
-        {
-            "type": "vcs",
-            "url" : "https://github.com/rollbar/rollbar-php-laravel.git"
-        }
-    ]
-```
-This will change once the package makes its' way to Packagist.
-
 Install using composer:
 
 ```
