@@ -53,10 +53,10 @@ Usage
 To automatically monitor exceptions, simply use the `Log` facade in your error handler in `app/Exceptions/Handler.php`:
 
 ```php
-public function report(Exception $e)
+public function report(Exception $exception)
 {
-    \Log::error($e);
-    return parent::report($e);
+    \Log::error($exception); //rollbar
+    parent::report($exception);
 }
 ```
 
