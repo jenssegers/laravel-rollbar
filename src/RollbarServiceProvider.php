@@ -4,6 +4,8 @@ use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Rollbar;
 use RollbarNotifier;
+use Auth;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,33 @@ class RollbarServiceProvider extends ServiceProvider
                 $level = $args[0];
                 $message = $args[1];
                 $context = $args[2];
+            }
+
+            $user = Auth::user();
+            // log logged in user details
+            if ($user instanceof Authenticatable) {
+                $personData = [
+                    'id' => $user->getAuthIdentifier(),
+                ];
+                
+                // email address, if we have it
+                if ($user->getAttributeValue('email') != null) {
+                    $personData['email'] = $user->getAttributeValue('email');
+                }
+                
+                // try to obtain a username for the current user
+                $usernameAttributes = [
+                    'username',
+                    'name',
+                ];
+                foreach ($usernameAttributes as $attr) {
+                    if ($user->getAttributeValue($attr) != null) {
+                        $personData['username'] = $user->getAttributeValue($attr);
+                        break;
+                    }
+                }
+                
+                $context['person'] = $personData;
             }
 
             $app['Jenssegers\Rollbar\RollbarLogHandler']->log($level, $message, $context);
