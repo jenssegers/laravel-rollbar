@@ -25,5 +25,15 @@
         "psr-4": {
             "Jenssegers\\Rollbar\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jenssegers\\Rollbar\\RollbarServiceProvider"
+            ],
+            "aliases": {
+                "Rollbar": "Jenssegers\\Rollbar\\Facades\\Rollbar"
+            }
+        }
     }
 }
