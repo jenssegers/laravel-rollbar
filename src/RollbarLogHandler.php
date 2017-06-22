@@ -1,11 +1,13 @@
-<?php namespace Jenssegers\Rollbar;
+<?php
+
+namespace Jenssegers\Rollbar;
 
 use Exception;
-use Illuminate\Foundation\Application;
 use InvalidArgumentException;
-use Monolog\Logger as Monolog;
-use Psr\Log\AbstractLogger;
 use RollbarNotifier;
+use Psr\Log\AbstractLogger;
+use Monolog\Logger as Monolog;
+use Illuminate\Foundation\Application;
 
 class RollbarLogHandler extends AbstractLogger
 {
@@ -75,7 +77,7 @@ class RollbarLogHandler extends AbstractLogger
 
         $context = $this->addContext($context);
 
-        if ($message instanceof Exception) {
+        if ($message instanceof Exception || $message instanceof Throwable) {
             $this->rollbar->report_exception($message, null, $context);
         } else {
             $this->rollbar->report_message($message, $level, $context);
