@@ -33,6 +33,13 @@ If you only want to enable Rollbar reporting for certain environments you can co
     }
 ```
 
+Service providers and configuration gets cached. If you've added Rollbar and nothing shows up you may need to bust the cache with:
+
+```
+php artisan cache:clear
+php artisan config:cache
+```
+
 Configuration
 -------------
 
