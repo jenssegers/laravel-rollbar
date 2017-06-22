@@ -60,6 +60,19 @@ public function report(Exception $exception)
 }
 ```
 
+To automatically monitor exceptions, **without logging exceptions in $dontReport array (which includes HTTP Exceptions by default)**, you can use this in `app/Exceptions/Handler.php`:
+
+```php
+public function report(Exception $e)
+{
+    if($this->shouldReport($e)){
+        \Log::error($e);
+    }
+    
+    return parent::report($e);
+}
+```
+
 
 For Laravel 4 installations, this is located in `app/start/global.php`:
 
