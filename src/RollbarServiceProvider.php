@@ -21,6 +21,11 @@ class RollbarServiceProvider extends ServiceProvider
     {
         $app = $this->app;
 
+        // Don't listen for Log events if Rollbar is not configured.
+        if (! $app->bound('Jenssegers\Rollbar\RollbarLogHandler')) {
+            return;
+        }
+
         // Listen to log messages.
         $app['log']->listen(function () use ($app) {
             $args = func_get_args();
@@ -46,7 +51,7 @@ class RollbarServiceProvider extends ServiceProvider
     public function register()
     {
         // Don't register rollbar if it is not configured.
-        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
+        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar.access_token')) {
             return;
         }
 
