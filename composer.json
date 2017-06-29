@@ -32,6 +32,16 @@
             "Rollbar\\Laravel\\": "src/"
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rollbar\\Laravel\\RollbarServiceProvider"
+            ],
+            "aliases": {
+                "Rollbar": "Rollbar\\Laravel\\Facades\\Rollbar"
+            }
+        }
+    },
     "scripts": {
         "test": [
           "phpunit --coverage-clover build/logs/clover.xml",
