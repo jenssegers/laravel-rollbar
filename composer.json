@@ -38,5 +38,12 @@
           "phpcs --standard=PSR1,PSR2 src tests"
         ],
         "fix": "phpcbf --standard=PSR1,PSR2 src tests"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rollbar\\Laravel\\RollbarServiceProvider"
+            ]
+        }
     }
 }
