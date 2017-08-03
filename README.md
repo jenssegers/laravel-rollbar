@@ -89,7 +89,7 @@ You can pass user information as context like this:
 
 ```php
 \Log::error('Something went wrong', [
-    'person' => ['id' => 123, 'username' => 'John Doe', 'email' => 'john@doe.com']
+    'person' => ['id' =>(string) 123, 'username' => 'John Doe', 'email' => 'john@doe.com']
 ]);
 ```
 
