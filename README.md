@@ -31,8 +31,11 @@ Rollbar\Laravel\RollbarServiceProvider::class,
 If you only want to enable Rollbar reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
 
 ```php
-if ($this->app->environment('production')) {
-    $this->app->register(\Rollbar\Laravel\RollbarServiceProvider::class);
+public function register()
+{
+    if ($this->app->environment('production')) {
+        $this->app->register(\Rollbar\Laravel\RollbarServiceProvider::class);
+    }
 }
 ```
 
@@ -58,10 +61,10 @@ Usage
 To automatically monitor exceptions, simply use the `Log` facade in your error handler in `app/Exceptions/Handler.php`:
 
 ```php
-public function report(Exception $e)
+public function report(Exception $exception)
 {
-    \Log::error($e);
-    return parent::report($e);
+    \Log::error($exception);
+    return parent::report($exception);
 }
 ```
 
