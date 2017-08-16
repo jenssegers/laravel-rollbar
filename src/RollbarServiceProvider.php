@@ -19,6 +19,11 @@ class RollbarServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Don't boot rollbar if it is not configured.
+        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
+            return;
+        }
+
         $app = $this->app;
 
         // Listen to log messages.
