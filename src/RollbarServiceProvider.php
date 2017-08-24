@@ -20,7 +20,7 @@ class RollbarServiceProvider extends ServiceProvider
     public function boot()
     {
         // Don't boot rollbar if it is not configured.
-        if ($this->stopRegistration() === true) {
+        if ($this->stop() === true) {
             return;
         }
 
@@ -51,7 +51,7 @@ class RollbarServiceProvider extends ServiceProvider
     public function register()
     {
         // Don't register rollbar if it is not configured.
-        if ($this->stopRegistration() === true) {
+        if ($this->stop() === true) {
             return;
         }
 
@@ -88,11 +88,12 @@ class RollbarServiceProvider extends ServiceProvider
      *
      * @return boolean
      */
-    public function stopRegistration()
+    public function stop()
     {
+        $level = strtolower(getenv('ROLLBAR_LEVEL'));
         $hasToken = !empty(getenv('ROLLBAR_TOKEN'));
         $hasConfig = $this->app['config']->has('services.rollbar');
 
-        return $hasToken === false && $hasConfig === false;
+        return $level == 'none' || $hasToken === false && $hasConfig === false;
     }
 }
