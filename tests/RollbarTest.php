@@ -177,4 +177,27 @@ class RollbarTest extends \Orchestra\Testbench\TestCase
         $this->app->log->alert('hello');
         $this->app->log->emergency('hello');
     }
+
+    public function testPersonFunctionIsCalledWhenSessionContainsAtLeastOneItem()
+    {
+        $this->app->config->set('services.rollbar.person_fn', function () {
+            return [
+                'id' => '123',
+                'username' => 'joebloggs',
+            ];
+        });
+
+        $logger = $this->app->make('Rollbar\RollbarLogger');
+
+        $this->app->session->put('foo', 'bar');
+
+        $this->app->log->debug('hello');
+
+        $config = $logger->extend([]);
+
+        $person = $config['person'];
+
+        $this->assertEquals('123', $person['id']);
+        $this->assertEquals('joebloggs', $person['username']);
+    }
 }

@@ -87,19 +87,33 @@ class RollbarLogHandler extends AbstractLogger
     {
         // Add session data.
         if ($session = $this->app->session->all()) {
+            $config = $this->logger->extend([]);
+
+            if (empty($config['person']) or ! is_array($config['person'])) {
+                $person = [];
+            } else {
+                $person = $config['person'];
+            }
+
             // Merge person context.
             if (isset($context['person']) and is_array($context['person'])) {
-                $this->logger->configure(['person' => $context['person']]);
+                $person = $context['person'];
                 unset($context['person']);
+            } else {
+                if (isset($config['person_fn']) && is_callable($config['person_fn'])) {
+                    $data = @call_user_func($config['person_fn']);
+                    if (isset($data['id'])) {
+                        $person = call_user_func($config['person_fn']);
+                    }
+                }
             }
 
             // Add user session information.
-            $config = $this->logger->extend([]);
-            $person = isset($config['person']) ? $config['person'] : [];
-            
-            $person['session'] = isset($person['session']) ?
-                array_merge($session, $person['session']) :
+            if (isset($person['session'])) {
+                $person['session'] = array_merge($session, $person['session']);
+            } else {
                 $person['session'] = $session;
+            }
 
             // User session id as user id if not set.
             if (! isset($person['id'])) {
