@@ -20,7 +20,7 @@ class RollbarServiceProvider extends ServiceProvider
     public function boot()
     {
         // Don't boot rollbar if it is not configured.
-        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
+        if ($this->stop() === true) {
             return;
         }
 
@@ -51,35 +51,50 @@ class RollbarServiceProvider extends ServiceProvider
     public function register()
     {
         // Don't register rollbar if it is not configured.
-        if (! getenv('ROLLBAR_TOKEN') and ! $this->app['config']->get('services.rollbar')) {
+        if ($this->stop() === true) {
             return;
         }
 
         $app = $this->app;
 
         $this->app->singleton('Rollbar\RollbarLogger', function ($app) {
-            
+
             $defaults = [
                 'environment'  => $app->environment(),
                 'root'         => base_path(),
             ];
             $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
-            
+
             if (empty($config['access_token'])) {
                 throw new InvalidArgumentException('Rollbar access token not configured');
             }
-            
+
             \Rollbar\Rollbar::init($config);
-            
+
             return Rollbar::logger();
         });
 
         $this->app->singleton('Rollbar\Laravel\RollbarLogHandler', function ($app) {
-            
+
             $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
 
             return new RollbarLogHandler($app['Rollbar\RollbarLogger'], $app, $level);
         });
+    }
+
+    /**
+     * Check if we should prevent the service from registering
+     *
+     * @return boolean
+     */
+    public function stop()
+    {
+        $level = getenv('ROLLBAR_LEVEL') ?: $this->app->config->get('services.rollbar.level', null);
+        $hasLevel = empty($level) === false || strtolower($level) != 'none';
+        $hasToken = getenv('ROLLBAR_TOKEN');
+        $hasConfig = $this->app['config']->has('services.rollbar');
+
+        return $hasLevel === false || ($hasToken === false && $hasConfig === false);
     }
 }
