@@ -91,7 +91,7 @@ class RollbarServiceProvider extends ServiceProvider
     public function stop()
     {
         $level = getenv('ROLLBAR_LEVEL') ?: $this->app->config->get('services.rollbar.level', null);
-        $token = getenv('ROLLBAR_TOKEN') ?: $this->app->config->get('services.rollbar.token', null);
+        $token = getenv('ROLLBAR_TOKEN') ?: $this->app->config->get('services.rollbar.access_token', null);
         $hasToken = empty($token) === false;
 
         return $hasToken === false || $level === 'none';
