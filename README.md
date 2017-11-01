@@ -32,22 +32,6 @@ public function register()
     }
 }
 ```
-
-## Configuration
-
-Setting up `ROLLBAR_TOKEN` in .env should be enough for basic configuration.
-
-This package supports configuration through the services configuration file located in `config/services.php`. All rollbar configuration variables will be directly passed to Rollbar:
-
-```php
-'rollbar' => [
-    'access_token' => env('ROLLBAR_TOKEN'),
-    'level' => env('ROLLBAR_LEVEL'),
-],
-```
-
-The level variable defines the minimum log level at which log messages are sent to Rollbar. If not specified, the default is `debug`. For development you could set this either to `debug` to send `all` log messages, or to `none` to send no messages at all. For production you could set this to `error` so that all `info` and `debug` messages are ignored.
-
 ## Usage
 
 This package will automatically send to Rollbar every logged message whose level is higher than the ROLLBAR_LEVEL you have configured.
@@ -59,7 +43,6 @@ You can log your own messages anywhere in your app. For example, to log a `debug
 ```php
 \Log::debug('Here is some debug information');
 ```
-
 
 ### Adding Context Informaton
 
@@ -103,3 +86,18 @@ App::error(function(Exception $exception, $code)
     Log::error($exception);
 });
 ```
+
+## Configuration
+
+Setting up `ROLLBAR_TOKEN` in .env should be enough for basic configuration.
+
+This package supports configuration through the services configuration file located in `config/services.php`. All rollbar configuration variables will be directly passed to Rollbar:
+
+```php
+'rollbar' => [
+    'access_token' => env('ROLLBAR_TOKEN'),
+    'level' => env('ROLLBAR_LEVEL'),
+],
+```
+
+The level variable defines the minimum log level at which log messages are sent to Rollbar. If not specified, the default is `debug`. For development you could set this either to `debug` to send `all` log messages, or to `none` to send no messages at all. For production you could set this to `error` so that all `info` and `debug` messages are ignored.
