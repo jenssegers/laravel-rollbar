@@ -1,14 +1,10 @@
-# Laravel Rollbar
-=================
-
-[![Build Status](https://travis-ci.org/rollbar/rollbar-php-laravel.svg?branch=master)](https://travis-ci.org/rollbar/rollbar-laravel) 
+# Laravel Rollbar [![Build Status](https://travis-ci.org/rollbar/rollbar-php-laravel.svg?branch=master)](https://travis-ci.org/rollbar/rollbar-laravel) 
 
 Rollbar error monitoring integration for Laravel projects. This library adds a listener to Laravel's logging component. Laravel's session information will be sent in to Rollbar, as well as some other helpful information such as 'environment', 'server', and 'session'.
 
 ![rollbar](https://d37gvrvc0wt4s1.cloudfront.net/static/img/features-dashboard1.png?ts=1361907905)
 
 ## Installation
----------------
 
 Install using composer:
 
@@ -40,7 +36,6 @@ public function register()
 ```
 
 ## Configuration
-----------------
 
 Setting up `ROLLBAR_TOKEN` in .env should be enough for basic configuration.
 
@@ -56,7 +51,6 @@ This package supports configuration through the services configuration file loca
 The level variable defines the minimum log level at which log messages are sent to Rollbar. If not specified, the default is `debug`. For development you could set this either to `debug` to send `all` log messages, or to `none` to send no messages at all. For production you could set this to `error` so that all `info` and `debug` messages are ignored.
 
 ## Usage
---------
 
 This package will automatically send to Rollbar every logged message whose level is higher than the ROLLBAR_LEVEL you have configured.
 
@@ -88,7 +82,7 @@ Or pass some extra information:
 ```
 
 ### Exception Logging
----------------------
+
 *NOTE*: Fatal exceptions will always be sent to Rollbar.
 
 Any exceptions that are not listed as `$dontReport` in your `app/Exceptions/Handler.php` or its parent will be sent to Rollbar automatically.
