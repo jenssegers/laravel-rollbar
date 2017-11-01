@@ -10,7 +10,7 @@ Install using composer:
 composer require rollbar/rollbar-laravel
 ```
 
-Add Project Access Token `post_server_item` from Rollbar.com → Settings → Project Access Tokens to `.env`:
+Add Project Access Token `post_server_item` from `Rollbar.com → Settings → Project Access Tokens` to `.env`:
 
 ```
 ROLLBAR_TOKEN=[your Rollbar project access token]
