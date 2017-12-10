@@ -38,7 +38,7 @@ By default Rollbar Laravel supports auto-discovery. If you do not want to auto-d
 
 ### Enabling / disabling Rollbar on specific environments
 
-First, (disable auto-discovery)[https://github.com/rollbar/rollbar-php-laravel/blob/master/README.md#disabling-laravel-55s-auto-discovery].
+First, [disable auto-discovery](https://github.com/rollbar/rollbar-php-laravel/blob/master/README.md#disabling-laravel-55s-auto-discovery).
 
 If you only want to enable Rollbar reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
 
