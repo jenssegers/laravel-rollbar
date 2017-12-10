@@ -22,6 +22,24 @@ Add the service provider to the `'providers'` array in `config/app.php` (this pa
 Rollbar\Laravel\RollbarServiceProvider::class,
 ```
 
+### Disabling Laravel 5.5's auto-discovery
+
+By default Rollbar Laravel supports auto-discovery. If you do not want to auto-discover the package add the following code to your `composer.json`:
+
+```json
+"extra": {
+        "laravel": {
+            "dont-discover": [
+                "rollbar/rollbar-laravel"
+            ]
+        }
+    },
+```
+
+### Enabling / disabling Rollbar on specific environments
+
+First, (disable auto-discovery)[https://github.com/rollbar/rollbar-php-laravel].
+
 If you only want to enable Rollbar reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
 
 ```php
