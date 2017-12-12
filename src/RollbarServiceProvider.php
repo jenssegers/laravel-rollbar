@@ -60,8 +60,11 @@ class RollbarServiceProvider extends ServiceProvider
         $this->app->singleton('Rollbar\RollbarLogger', function ($app) {
 
             $defaults = [
-                'environment'  => $app->environment(),
-                'root'         => base_path(),
+                'environment'       => $app->environment(),
+                'root'              => base_path(),
+                'handle_exception'  => true,
+                'handle_error'      => true,
+                'handle_fatal'      => true,
             ];
             $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
             $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
@@ -70,7 +73,11 @@ class RollbarServiceProvider extends ServiceProvider
                 throw new InvalidArgumentException('Rollbar access token not configured');
             }
 
-            \Rollbar\Rollbar::init($config);
+            $handleException = (bool) array_pull($config, 'handle_exception');
+            $handleError = (bool) array_pull($config, 'handle_error');
+            $handleFatal = (bool) array_pull($config, 'handle_fatal');
+
+            Rollbar::init($config, $handleException, $handleError, $handleFatal);
 
             return Rollbar::logger();
         });
