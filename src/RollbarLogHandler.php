@@ -75,6 +75,11 @@ class RollbarLogHandler extends AbstractLogger
 
         $context = $this->addContext($context);
 
+        // Workaround Laravel 5.5 moving exception from message into context
+        if (! empty($context['exception']) && is_string($message)) {
+            $message = $context['exception'];
+        }
+
         return $this->logger->log($level, $message, $context);
     }
 
