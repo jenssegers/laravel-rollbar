@@ -35,6 +35,7 @@ By default Rollbar Laravel supports auto-discovery. If you do not want to auto-d
         }
     },
 ```
+Don't forget to run `$ php artisan package:discover` to recreate `Package manifest file`.
 
 ### Enabling / disabling Rollbar on specific environments
 
