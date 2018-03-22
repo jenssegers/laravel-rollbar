@@ -9,6 +9,11 @@ php:
   - 5.5
   - 5.4
   - hhvm
+  - nightly
+  
+matrix:
+  allow_failures:
+    - php: nightly
 
 sudo: false
 
