@@ -4,12 +4,11 @@ dist: trusty
 php:
   - 7.2
   - 7.1
-  - hhvm
   - nightly
   
 matrix:
   allow_failures:
-    - php: [nightly,hhvm]
+    - php: nightly
 
 sudo: false
 
