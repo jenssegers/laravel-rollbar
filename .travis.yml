@@ -9,7 +9,7 @@ php:
   
 matrix:
   allow_failures:
-    - php: nightly
+    - php: [nightly,hhvm]
 
 sudo: false
 
