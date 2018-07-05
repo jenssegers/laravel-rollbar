@@ -47,11 +47,11 @@ For bug reports, please [open an issue on GitHub](https://github.com/rollbar/rol
 
 ## Testing
 Tests are in `tests`.
-To run the tests: `composer test`
-To fix code style issues: `composer fix`
+* To run the tests: `composer test`
+* To fix code style issues: `composer fix`
 
 ## Docker
 Docker binaries are located in `./bin` and can be run by simply executing `bin/phpunit` for example.
-To run tests: `bin/phpunit`
-To run all supported versions: `bin/phpunit-versions`
-To run composer : `bin/composer install` OR `bin/composer update`
+* To run tests: `bin/phpunit`
+* To run all supported versions: `bin/phpunit-versions`
+* To run composer : `bin/composer install` OR `bin/composer update`

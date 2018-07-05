@@ -7,5 +7,5 @@ docker run -it --rm \
 	-v "$PWD":/usr/src \
 	-w /usr/src \
 	php:7.2-cli-alpine \
-	vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+	vendor/bin/phpcs --standard=PSR1,PSR2 src tests 
 
