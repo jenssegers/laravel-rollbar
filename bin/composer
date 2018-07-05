@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+docker run --rm --interactive --tty \
+	-e "TERM=xterm-256color" \
+    -v $PWD:/app \
+    composer "$@"

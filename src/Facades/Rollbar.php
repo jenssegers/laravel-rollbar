@@ -1,6 +1,7 @@
 <?php namespace Rollbar\Laravel\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Rollbar\Laravel\RollbarLogHandler;
 
 class Rollbar extends Facade
 {
@@ -11,6 +12,6 @@ class Rollbar extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'Rollbar\Laravel\RollbarLogHandler';
+        return RollbarLogHandler::class;
     }
 }

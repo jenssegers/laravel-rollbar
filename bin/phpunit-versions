@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+declare -a versions=("7.1" "7.2")
+
+for version in "${versions[@]}"
+do
+    docker run -it --rm \
+    	-e "TERM=xterm-256color" \
+    	-v "$PWD":/usr/src \
+    	-w /usr/src \
+    	php:"$version"-cli-alpine \
+    	vendor/bin/phpunit "$@"
+done

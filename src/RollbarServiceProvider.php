@@ -1,9 +1,11 @@
 <?php namespace Rollbar\Laravel;
 
-use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
-use Rollbar\Rollbar;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\ServiceProvider;
 use Rollbar\Laravel\RollbarLogHandler;
+use Rollbar\RollbarLogger;
+use Rollbar\Rollbar;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -41,7 +43,7 @@ class RollbarServiceProvider extends ServiceProvider
                 $context = $args[2];
             }
 
-            $app['Rollbar\Laravel\RollbarLogHandler']->log($level, $message, $context);
+            $app[RollbarLogHandler::class]->log($level, $message, $context);
         });
     }
 
@@ -55,9 +57,7 @@ class RollbarServiceProvider extends ServiceProvider
             return;
         }
 
-        $app = $this->app;
-
-        $this->app->singleton('Rollbar\RollbarLogger', function ($app) {
+        $this->app->singleton(RollbarLogger::class, function ($app) {
 
             $defaults = [
                 'environment'       => $app->environment(),
@@ -66,8 +66,10 @@ class RollbarServiceProvider extends ServiceProvider
                 'handle_error'      => true,
                 'handle_fatal'      => true,
             ];
-            $config = array_merge($defaults, $app['config']->get('services.rollbar', []));
-            $config['access_token'] = getenv('ROLLBAR_TOKEN') ?: $app['config']->get('services.rollbar.access_token');
+
+            $config = array_merge($defaults, $app['config']->get('logging.channels.rollbar', []));
+
+            $config['access_token'] = static::config('access_token');
 
             if (empty($config['access_token'])) {
                 throw new InvalidArgumentException('Rollbar access token not configured');
@@ -82,11 +84,11 @@ class RollbarServiceProvider extends ServiceProvider
             return Rollbar::logger();
         });
 
-        $this->app->singleton('Rollbar\Laravel\RollbarLogHandler', function ($app) {
+        $this->app->singleton(RollbarLogHandler::class, function ($app) {
 
-            $level = getenv('ROLLBAR_LEVEL') ?: $app['config']->get('services.rollbar.level', 'debug');
+            $level = static::config('level', 'debug');
 
-            return new RollbarLogHandler($app['Rollbar\RollbarLogger'], $app, $level);
+            return new RollbarLogHandler($app[RollbarLogger::class], $app, $level);
         });
     }
 
@@ -95,12 +97,34 @@ class RollbarServiceProvider extends ServiceProvider
      *
      * @return boolean
      */
-    public function stop()
+    public function stop() : bool
     {
-        $level = getenv('ROLLBAR_LEVEL') ?: $this->app->config->get('services.rollbar.level', null);
-        $token = getenv('ROLLBAR_TOKEN') ?: $this->app->config->get('services.rollbar.access_token', null);
+        $level = static::config('level');
+
+        $token = static::config('token');
+
         $hasToken = empty($token) === false;
 
         return $hasToken === false || $level === 'none';
+    }
+
+    /**
+     * Return a rollbar logging config
+     *
+     * @param array|string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    protected static function config($key = '', $default = null)
+    {
+        $envKey = 'ROLLBAR_'.strtoupper($key);
+
+        if ($envKey === 'ROLLBAR_ACCESS_TOKEN') {
+            $envKey = 'ROLLBAR_TOKEN';
+        }
+
+        $logKey = empty($key) ? 'logging.channels.rollbar' : "logging.channels.rollbar.$key";
+
+        return getenv($envKey) ?: Config::get($logKey, $default);
     }
 }
