@@ -53,5 +53,6 @@ Tests are in `tests`.
 ## Docker
 Docker binaries are located in `./bin` and can be run by simply executing `bin/phpunit` for example.
 * To run tests: `bin/phpunit`
+* To run code sniffer: `bin/phpcs` or `bin/phpcbf`
 * To run all supported versions: `bin/phpunit-versions`
 * To run composer : `bin/composer install` OR `bin/composer update`

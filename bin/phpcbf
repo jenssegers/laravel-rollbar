@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+docker run -it --rm \
+	-e "TERM=xterm-256color" \
+	-v "$PWD":/usr/src \
+	-w /usr/src \
+	php:7.2-cli-alpine \
+	vendor/bin/phpcbf --standard=PSR1,PSR2 src tests
+
