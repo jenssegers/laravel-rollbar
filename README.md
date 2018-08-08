@@ -15,6 +15,10 @@ For complete usage instructions and configuration reference, see our [Laravel SD
 
 See our [Releases](https://github.com/rollbar/rollbar-php-laravel/releases) page for a list of all releases, including changes.
 
+### Laravel 5.5 and below
+Laravel 5.6 now requires PHP >= 7.1. As of `rollbar/rollbar-php-laravel:v3.0.0` master also supports 5.6.
+
+We still maintain support for Laravel 5.5 and below on branch `laravel-5.5` and releases in the `2.x.x` major.
 
 ## Related projects
 
