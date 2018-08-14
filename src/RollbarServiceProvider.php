@@ -43,7 +43,18 @@ class RollbarServiceProvider extends ServiceProvider
                 $context = $args[2];
             }
 
-            $app[RollbarLogHandler::class]->log($level, $message, $context);
+            if (strpos($message, 'Unable to send messages to Rollbar API. Produced response: ') !== false) {
+                return;
+            }
+
+            $result = $app[RollbarLogHandler::class]->log($level, $message, $context);
+
+            if (!$result->getStatus()) {
+                \Log::error(
+                    'Unable to send messages to Rollbar API. Produced response: ' .
+                    print_r($result, true)
+                );
+            }
         });
     }
 
