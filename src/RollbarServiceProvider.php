@@ -3,7 +3,7 @@
 use InvalidArgumentException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
-use Rollbar\Laravel\RollbarLogHandler;
+use Rollbar\Laravel\MonologHandler;
 use Rollbar\RollbarLogger;
 use Rollbar\Rollbar;
 
@@ -15,48 +15,6 @@ class RollbarServiceProvider extends ServiceProvider
      * @var bool
      */
     protected $defer = false;
-
-    /**
-     * Bootstrap the application events.
-     */
-    public function boot()
-    {
-        // Don't boot rollbar if it is not configured.
-        if ($this->stop() === true) {
-            return;
-        }
-
-        $app = $this->app;
-
-        // Listen to log messages.
-        $app['log']->listen(function () use ($app) {
-            $args = func_get_args();
-
-            // Laravel 5.4 returns a MessageLogged instance only
-            if (count($args) == 1) {
-                $level = $args[0]->level;
-                $message = $args[0]->message;
-                $context = $args[0]->context;
-            } else {
-                $level = $args[0];
-                $message = $args[1];
-                $context = $args[2];
-            }
-
-            if (strpos($message, 'Unable to send messages to Rollbar API. Produced response: ') !== false) {
-                return;
-            }
-
-            $result = $app[RollbarLogHandler::class]->log($level, $message, $context);
-
-            if (!$result->getStatus()) {
-                \Log::error(
-                    'Unable to send messages to Rollbar API. Produced response: ' .
-                    print_r($result, true)
-                );
-            }
-        });
-    }
 
     /**
      * Register the service provider.
@@ -95,11 +53,14 @@ class RollbarServiceProvider extends ServiceProvider
             return Rollbar::logger();
         });
 
-        $this->app->singleton(RollbarLogHandler::class, function ($app) {
+        $this->app->singleton(MonologHandler::class, function ($app) {
 
             $level = static::config('level', 'debug');
+            
+            $handler = new MonologHandler($app[RollbarLogger::class], $level);
+            $handler->setApp($app);
 
-            return new RollbarLogHandler($app[RollbarLogger::class], $app, $level);
+            return $handler;
         });
     }
 
