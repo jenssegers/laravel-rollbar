@@ -10,13 +10,6 @@ use Rollbar\Rollbar;
 class RollbarServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = false;
-
-    /**
      * Register the service provider.
      */
     public function register()
