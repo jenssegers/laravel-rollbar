@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Rollbar\Laravel\MonologHandler;
 use Rollbar\RollbarLogger;
 use Rollbar\Rollbar;
+use Illuminate\Contracts\Debug\ExceptionHandler as LaravelExceptionHandlerContract;
+use Rollbar\Laravel\ExceptionHandler;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -55,6 +57,11 @@ class RollbarServiceProvider extends ServiceProvider
 
             return $handler;
         });
+        
+        $this->app->bind(
+            LaravelExceptionHandlerContract::class,
+            ExceptionHandler::class
+        );
     }
 
     /**
