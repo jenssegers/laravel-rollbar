@@ -66,7 +66,7 @@ class RollbarServiceProvider extends ServiceProvider
     {
         $level = static::config('level');
 
-        $token = static::config('token');
+        $token = static::config('access_token');
 
         $hasToken = empty($token) === false;
 
@@ -86,10 +86,6 @@ class RollbarServiceProvider extends ServiceProvider
 
         if ($envKey === 'ROLLBAR_ACCESS_TOKEN') {
             $envKey = 'ROLLBAR_TOKEN';
-        }
-
-        if ($key === 'token') {
-            $key = 'access_token';
         }
 
         $logKey = empty($key) ? 'logging.channels.rollbar' : "logging.channels.rollbar.$key";
