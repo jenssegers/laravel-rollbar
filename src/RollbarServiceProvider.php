@@ -88,6 +88,10 @@ class RollbarServiceProvider extends ServiceProvider
             $envKey = 'ROLLBAR_TOKEN';
         }
 
+        if ($key === 'token') {
+            $key = 'access_token';
+        }
+
         $logKey = empty($key) ? 'logging.channels.rollbar' : "logging.channels.rollbar.$key";
 
         return getenv($envKey) ?: Config::get($logKey, $default);
