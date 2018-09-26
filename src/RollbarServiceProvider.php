@@ -66,7 +66,7 @@ class RollbarServiceProvider extends ServiceProvider
     {
         $level = static::config('level');
 
-        $token = static::config('token');
+        $token = static::config('access_token');
 
         $hasToken = empty($token) === false;
 
