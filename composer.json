@@ -1,5 +1,5 @@
 {
-    "name": "ethical-jobs/rollbar-laravel",
+    "name": "rollbar/rollbar-laravel",
     "description": "Rollbar error monitoring integration for Laravel projects",
     "keywords": ["laravel", "rollbar", "monitoring", "error", "logging"],
     "homepage": "https://github.com/rollbar/rollbar-php-laravel",
