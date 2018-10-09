@@ -5,7 +5,8 @@ Rollbar error monitoring integration for Laravel projects. This library adds a l
 ## Setup Instructions
 
 1. [Sign up for a Rollbar account](https://rollbar.com/signup)
-2. Follow the [Installation](https://docs.rollbar.com/docs/laravel#section-installation) instructions in our [Laravel SDK docs](https://docs.rollbar.com/docs/laravel) to install rollbar-gem and configure it for your platform.
+2. If you're using Laravel 5.6 and up follow [Installation](https://docs.rollbar.com/docs/laravel#section-installation) instructions in our [Laravel 5.6 and up SDK docs](https://docs.rollbar.com/docs/laravel)
+3. If you're using Laravel 5.5 or lower follow [Installation](https://docs.rollbar.com/v1.0.0/docs/laravel-55-and-lower#section-installation) instructions in our [Laravel 5.6 and up SDK docs](https://docs.rollbar.com/v1.0.0/docs/laravel-55-and-lower)
 
 ## Usage and Reference
 
