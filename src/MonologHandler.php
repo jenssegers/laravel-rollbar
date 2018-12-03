@@ -43,8 +43,17 @@ class MonologHandler extends RollbarHandler
             } else {
                 if (isset($config['person_fn']) && is_callable($config['person_fn'])) {
                     $data = @call_user_func($config['person_fn']);
-                    if (isset($data['id'])) {
-                        $person = call_user_func($config['person_fn']);
+                    if (! empty($data)) {
+                        if (is_object($data)) {
+                            if (method_exists($data, 'toArray')) {
+                                $data = $data->toArray();
+                            } else {
+                                $data = (array)$data;
+                            }
+                        }
+                        if (isset($data['id'])) {
+                            $person = $data;
+                        }
                     }
                 }
             }
