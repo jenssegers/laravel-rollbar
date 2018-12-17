@@ -7,12 +7,12 @@ use Rollbar\Monolog\Handler\RollbarHandler;
 class MonologHandler extends RollbarHandler
 {
     protected $app;
-    
+
     public function setApp($app)
     {
         $this->app = $app;
     }
-    
+
     protected function write(array $record)
     {
         $record['context'] = $this->addContext($record['context']);
@@ -30,23 +30,34 @@ class MonologHandler extends RollbarHandler
         if ($session = $this->app->session->all()) {
             $config = $this->rollbarLogger->extend([]);
 
-            if (empty($config['person']) or ! is_array($config['person'])) {
+            if (empty($config['person']) || ! is_array($config['person'])) {
                 $person = [];
             } else {
                 $person = $config['person'];
             }
 
             // Merge person context.
-            if (isset($context['person']) and is_array($context['person'])) {
+            if (isset($context['person']) && is_array($context['person'])) {
                 $person = $context['person'];
                 unset($context['person']);
-            } else {
-                if (isset($config['person_fn']) && is_callable($config['person_fn'])) {
-                    $data = @call_user_func($config['person_fn']);
-                    if (isset($data['id'])) {
-                        $person = call_user_func($config['person_fn']);
+            } elseif (isset($config['person_fn']) && is_callable($config['person_fn'])) {
+                $data = @call_user_func($config['person_fn']);
+                if (! empty($data)) {
+                    if (is_object($data)) {
+                        if (isset($data->id)) {
+                            $person['id'] = $data->id;
+                            if (isset($data->username)) {
+                                $person['username'] = $data->username;
+                            }
+                            if (isset($data->email)) {
+                                $person['email'] = $data->email;
+                            }
+                        }
+                    } elseif (is_array($data) && isset($data['id'])) {
+                        $person = $data;
                     }
                 }
+                unset($data);
             }
 
             // Add user session information.
@@ -60,7 +71,7 @@ class MonologHandler extends RollbarHandler
             if (! isset($person['id'])) {
                 $person['id'] = $this->app->session->getId();
             }
-                
+
             $this->rollbarLogger->configure(['person' => $person]);
         }
 
