@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=7.0",
-        "illuminate/support": "^5.0",
+        "illuminate/support": "^5.0 || ^6.0",
         "rollbar/rollbar": "^1"
     },
     "require-dev": {
