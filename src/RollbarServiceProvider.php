@@ -1,11 +1,12 @@
 <?php namespace Rollbar\Laravel;
 
+use Rollbar\Rollbar;
+use Rollbar\RollbarLogger;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
+use Rollbar\Laravel\MonologHandler;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
-use Rollbar\Laravel\MonologHandler;
-use Rollbar\RollbarLogger;
-use Rollbar\Rollbar;
 
 class RollbarServiceProvider extends ServiceProvider
 {
@@ -37,9 +38,9 @@ class RollbarServiceProvider extends ServiceProvider
                 throw new InvalidArgumentException('Rollbar access token not configured');
             }
 
-            $handleException = (bool) array_pull($config, 'handle_exception');
-            $handleError = (bool) array_pull($config, 'handle_error');
-            $handleFatal = (bool) array_pull($config, 'handle_fatal');
+            $handleException = (bool) Arr::pull($config, 'handle_exception');
+            $handleError = (bool) Arr::pull($config, 'handle_error');
+            $handleFatal = (bool) Arr::pull($config, 'handle_fatal');
 
             Rollbar::init($config, $handleException, $handleError, $handleFatal);
 
