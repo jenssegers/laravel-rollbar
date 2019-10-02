@@ -2,7 +2,7 @@
 
 namespace Rollbar\Laravel;
 
-use Rollbar\Monolog\Handler\RollbarHandler;
+use Monolog\Handler\RollbarHandler;
 
 class MonologHandler extends RollbarHandler
 {
@@ -13,7 +13,7 @@ class MonologHandler extends RollbarHandler
         $this->app = $app;
     }
 
-    protected function write(array $record)
+    protected function write(array $record): void
     {
         $record['context'] = $this->addContext($record['context']);
         parent::write($record);

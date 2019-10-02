@@ -17,8 +17,8 @@
     ],
     "require": {
         "php": ">=7.0",
-        "illuminate/support": "^5.0 || ^6.0",
-        "rollbar/rollbar": "^1"
+        "illuminate/support": "^6.0",
+        "rollbar/rollbar": "^2"
     },
     "require-dev": {
         "orchestra/testbench": "~3.6",
